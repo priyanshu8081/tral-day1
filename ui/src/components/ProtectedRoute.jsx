@@ -13,11 +13,11 @@ const ProtectedRoute = ({children}) => {
 export default ProtectedRoute
 
 
-export const PublicRoute = ({children}) => {
-    const token=localStorage.getItem('token');
+export const PublicRoutes=({children})=>{
+  const token=localStorage.getItem('token');
     if(token)
     {
-        return <Navigate to='/dashboard' replace />
+      return <Navigate to='/dashboard' replace/>
     }
-  return children
+    return children;
 }

@@ -6,12 +6,13 @@ import * as yup from 'yup';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { emailValidation } from '../utils/Validation';
 
 const schema = yup
     .object()
     .shape({
-        customer_name: yup.string().required().matches(/^[A-Za-z]{2,}$/, "company name should contain only letters"),
-        email: yup.string().required().matches(/^[A-Za-z\d%&+_-]+@[A-Za-z\d.]+\.[A-Za-z]{2,}$/,"enter valid email"),
+        customer_name: yup.string().required().matches(/^[A-Za-z]{3,}(?:\s[A-Za-z]+)*$/,"company name should contain only letters"),
+        email: emailValidation,
         phone: yup.string().required().matches(/^[6-9]\d{9}$/, "enter valid number"),
         alternate_phone: yup.string().required().matches(/^[6-9]\d{9}$/, "enter valid number"),
         address_line1: yup.string().required().matches(/^[a-zA-Z0-9\s,./#-]+$/,"enter valid address"),

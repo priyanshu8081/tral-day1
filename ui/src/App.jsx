@@ -5,9 +5,10 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
-import ProtectedRoute, { PublicRoute } from './components/ProtectedRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import AddProduct from './components/AddProduct';
 import ProductList from './components/PrdouctList';
+import { PublicRoutes } from './components/ProtectedRoute';
 import './App.css'
 const App = () => {
   return (
@@ -15,7 +16,11 @@ const App = () => {
       <Navbar />
       <Routes>
         {/* public  */}
-        <Route path='/' element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path='/' element={
+          <PublicRoutes>
+            <Login />
+          </PublicRoutes>
+        } />
         <Route path='/register' element={<Register />} />
 
         {/* protected */}

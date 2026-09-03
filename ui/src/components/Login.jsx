@@ -5,15 +5,13 @@ import * as yup from 'yup';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
+import { passwordValidation } from '../utils/Validation';
+import { loginUser } from '../services/ProductServices';
 const schema = yup
     .object()
     .shape({
         identifier: yup.string().required(),
-        password: yup.string().required()
-            .matches(/[A-Z]/,"atleast one uppercase")
-            .matches(/[a-z]/,"Atleast should be contain one lowercase")
-            .matches(/[\d]/,"should be contain one digits")
-            .matches(/[@#$%+_-]/,"alteast one one special symbol").min(8, "minimum 8 digit password"),
+        password: passwordValidation
     })
 
 const Login = () => {
@@ -23,10 +21,7 @@ const Login = () => {
     });
     const handleLogin = async (data) => {
         try {
-            const res = await axios.post(
-                'https://app.elationsoft.net/api/companies/login',
-                data
-            );
+            const res=await loginUser(data);
             if (res?.data?.success) {
                 toast.success(res?.data?.message);
                 localStorage.setItem('token', res?.data?.data?.token);

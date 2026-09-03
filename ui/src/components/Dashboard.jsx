@@ -8,27 +8,18 @@ import {
     FaPhone,
     FaCircleCheck,
 } from "react-icons/fa6";
+import { getCompanyProfile } from "../services/ProductServices";
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
-
+    const API_URL=import.meta.env.VITE_API_URL
     useEffect(() => {
         fetchedData();
     }, []);
 
     const fetchedData = async () => {
         try {
-            const token = localStorage.getItem("token");
-
-            const res = await axios.get(
-                "https://app.elationsoft.net/api/companies/profile",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
+           const res=await getCompanyProfile();
             setData(res?.data?.data);
         } catch (error) {
             console.log(error.response?.data);
