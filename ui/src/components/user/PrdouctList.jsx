@@ -770,7 +770,7 @@ const ProductList = () => {
                             </th>
 
                             <th>
-                                Company
+                                ID & Customer Name
                             </th>
 
                             <th>

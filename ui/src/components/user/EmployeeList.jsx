@@ -119,7 +119,6 @@ const EmployeeList = () => {
         try {
             const res = await getEmployees();
             console.log("Fetched employees API response:", res?.data);
-
             const apiData = res?.data?.data || res?.data || [];
             if (Array.isArray(apiData) && apiData.length > 0) {
                 setData(apiData);

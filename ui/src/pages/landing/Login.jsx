@@ -30,17 +30,17 @@ const Login = () => {
         setLoading(true);
         try {
             const res = await loginUser(data);
-            console.log(res)
-
             if (res?.data?.success === true) {
                 localStorage.setItem("token", res?.data?.data.token);
                 ToastService.success(res?.data?.message);
-                // navigate("/dashboard");
+                navigate("/dashboard");
             } else {
                 ToastService.error(res?.data?.message);
             }
         } catch (error) {
             ToastService.handleApiError(error);
+        }finally{
+            setLoading(false)
         }
     };
 

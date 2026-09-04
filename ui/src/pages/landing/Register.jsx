@@ -48,6 +48,8 @@ const Register = () => {
         if (data.logo?.[0]) {
             formData.append("logo", data.logo[0]);
         }
+        if(loading)  return;
+        setLoading(true);
         try {
             const res = await axios.post(
                 "https://app.elationsoft.net/api/companies",
@@ -65,7 +67,10 @@ const Register = () => {
                 error?.response?.data?.message ||
                 "Something went wrong"
             );
-        }
+        }finally {
+        // API response/error aane ke baad button enable
+        setLoading(false);
+    }
     };
 
     return (
@@ -335,11 +340,11 @@ const Register = () => {
 
                             {/* CREATE BUTTON */}
 
-                            <button
+                            <button disabled={loading}
                                 type="submit"
                                 className="create-btn"
                             >
-                                Create account
+                                {loading ? "creating account":"create account"}
                             </button>
 
 
