@@ -12,13 +12,13 @@ import { companyNameValidation, concatPersonValidation, designationValidation, e
 const schema = yup.object().shape({
     company_name:companyNameValidation,
 
-    contact_person_name:concatPersonValidation,
+    contact_person_name: concatPersonValidation,
 
     designation: designationValidation,
 
     email:emailValidation,
 
-    mobile:mobileValidation,
+    mobile: mobileValidation,
 
     logo: yup.mixed(),
 

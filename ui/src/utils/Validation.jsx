@@ -11,11 +11,10 @@ export const passwordValidation = yup.string().required()
     .matches(/[\d]/, "should be contain one digits")
     .matches(/[@#$%+_-]/, "alteast one one special symbol").min(8, "minimum 8 digit password");
 
-export const companyNameValidation = yup
-    .string()
-    .trim()
-    .required("Company name is required")
-    .matches(companyNameRegex, "Company name contains invalid characters");
+export const companyNameValidation =  yup
+        .string()
+        .required("Company name is required")
+        .matches(/^[A-Za-z ]{2,}$/, "Company name contain only letters");
 
 export const concatPersonValidation = yup
     .string()
