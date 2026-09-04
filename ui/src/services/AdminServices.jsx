@@ -19,8 +19,32 @@ export const getCompanyProfile = async () => {
 };
 
 // Update company profile
-export const editCompanyProfile = async (data) => {
-    return await axios.put(`${API_URL}/companies/profile`, data, {
+export const editCompanyProfile = async (idOrData, maybeData) => {
+    let id = idOrData;
+    let data = maybeData;
+    if (typeof idOrData === "object" && !maybeData) {
+        data = idOrData;
+        id = data?.company_id || data?.id;
+    }
+    const endpoint = id ? `${API_URL}/companies/${id}` : `${API_URL}/companies/profile`;
+    return await axios.put(endpoint, data, {
         headers: authHeader(),
     });
+};
+
+// Update company password
+export const updateCompanyPassword = async (passwords) => {
+    try {
+        return await axios.put(`${API_URL}/companies/password`, passwords, {
+            headers: authHeader(),
+        });
+    } catch (err) {
+        // Fallback to employee / auth password update if company password endpoint is 404
+        if (err?.response?.status === 404) {
+            return await axios.put(`${API_URL}/auth/update-password`, passwords, {
+                headers: authHeader(),
+            });
+        }
+        throw err;
+    }
 };

@@ -8,14 +8,16 @@ const authHeader = () => ({
 
 
 // GET /customer
-export const getCustomerList = async (query = "", sort = "") => {
-    console.log("#############",sort);
-    
+export const getCustomerList = async (queryParamsOrSearch = "", sort = "") => {
+    let params = {};
+    if (typeof queryParamsOrSearch === "object" && queryParamsOrSearch !== null) {
+        params = { ...queryParamsOrSearch };
+    } else {
+        if (queryParamsOrSearch) params.search = queryParamsOrSearch;
+        if (sort) params.sort = sort;
+    }
     return await axios.get(`${API_URL}/customer`, {
-        params: {
-            search: query,
-            sort: sort,
-        },
+        params,
         headers: authHeader(),
     });
 };
@@ -98,11 +100,35 @@ export const getEmployees = async (params = {}) => {
 };
 
 
+// POST /api/auth/create (Create Employee)
+export const createEmployee = async (data) => {
+    return await axios.post(
+        `${API_URL}/auth/create`,
+        data,
+        {
+            headers: authHeader(),
+        }
+    );
+};
+
+
 // PATCH /api/employees/:id/status
 export const updateEmployeeStatus = async (id, status) => {
     return await axios.patch(
         `${API_URL}/employees/${id}/status`,
         { status },
+        {
+            headers: authHeader(),
+        }
+    );
+};
+
+
+// PATCH /api/companies/verify-employee
+export const verifyEmployee = async (employeeId) => {
+    return await axios.patch(
+        `${API_URL}/companies/verify-employee`,
+        { employeeId },
         {
             headers: authHeader(),
         }

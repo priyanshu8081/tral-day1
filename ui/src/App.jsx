@@ -1,7 +1,7 @@
 // Bootstrap removed — using custom CSS design system
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import ProductList from './components/user/PrdouctList';
+import ProductList from './components/user/ProductList';
 import { PublicRoutes } from './components/ProtectedRoute';
 import './App.css'
 import Login from './pages/landing/Login';

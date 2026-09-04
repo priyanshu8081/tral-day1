@@ -137,9 +137,10 @@ body {
 
 /* ── PAGE WRAPPER ───────────────────────────────────── */
 .es-page {
-  padding: 28px 24px;
-  max-width: 1200px;
+  padding: 32px 28px 48px;
+  max-width: 1400px;
   margin: 0 auto;
+  min-height: calc(100vh - 60px);
 }
 
 /* ── PAGE HEADER ─────────────────────────────────────── */
@@ -147,21 +148,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
 
 .es-page-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--gray-900);
+  letter-spacing: -0.01em;
 }
 
 .es-page-subtitle {
-  font-size: 13px;
-  color: var(--gray-400);
-  margin-top: 2px;
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-top: 4px;
 }
 
 /* ── SEARCH BAR ──────────────────────────────────────── */

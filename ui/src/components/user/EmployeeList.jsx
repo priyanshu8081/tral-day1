@@ -6,87 +6,38 @@ import {
     FaEye,
     FaXmark,
     FaTriangleExclamation,
+    FaUserPlus,
+    FaArrowsRotate,
+    FaCircleCheck,
+    FaArrowDownWideShort,
+    FaArrowUpShortWide,
 } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { getEmployees, updateEmployeeStatus } from "../../services/UserServices";
+import {
+    getEmployees,
+    createEmployee,
+    updateEmployeeStatus,
+    verifyEmployee,
+} from "../../services/UserServices";
+import { getCompanyProfile } from "../../services/AdminServices";
+import { ToastService } from "../../utils/ToastUtils";
 import "../../styles/EmployeeList.css";
-
-
-const fallbackEmployees = [
-
-    {
-        id: 63,
-        employee_id: 63,
-        full_name: "Vishvajeet",
-        employee_code: "EMP-063",
-        role: "Developer",
-        email: "vishvajeet@gmail.com",
-        phone: "8081322313",
-        mobile_no: "8081322313",
-        department: "Engineering",
-        status: "ACTIVE",
-    },
-    {
-        id: 62,
-        employee_id: 62,
-        full_name: "Dipanshu",
-        employee_code: "EMP-062",
-        role: "Frontend Developer",
-        email: "dipanshu@gmail.com",
-        phone: "8089323513",
-        mobile_no: "8089323513",
-        department: "Engineering",
-        status: "ACTIVE",
-    },
-    {
-        id: 61,
-        employee_id: 61,
-        full_name: "Priyanshu Chauhan",
-        employee_code: "EMP-061",
-        role: "Backend Developer",
-        email: "priyanshu@gmail.com",
-        phone: "8081322313",
-        mobile_no: "8081322313",
-        department: "Engineering",
-        status: "ACTIVE",
-    },
-    {
-        id: 60,
-        employee_id: 60,
-        full_name: "Rahul Sharma",
-        employee_code: "EMP-060",
-        role: "UI/UX Designer",
-        email: "rahul@gmail.com",
-        phone: "8081322513",
-        mobile_no: "8081322513",
-        department: "Design",
-        status: "On Leave",
-    },
-    {
-        id: 59,
-        employee_id: 59,
-        full_name: "S t gamer Rajpoot",
-        employee_code: "EMP-059",
-        role: "Project Manager",
-        email: "stgamerrrajpoot@gmail.com",
-        phone: "8081323513",
-        mobile_no: "8081323513",
-        department: "Management",
-        status: "ACTIVE",
-    },
-];
 
 const EmployeeList = () => {
     const [data, setData] = useState([]);
-
-
-    const [loading, setLoading] = useState(false);
+    const [companyId, setCompanyId] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [query, setQuery] = useState("");
     const [filterDepartment, setFilterDepartment] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
-    const [sort, setSort] = useState("");
+
+    // DYNAMIC SORTING PARAMETERS
+    // Available sortBy values: employee_id, company_id, employee_code, full_name, email, status, created_at
+    const [sortBy, setSortBy] = useState("created_at");
+    // Available order values: DESC, ASC
+    const [order, setOrder] = useState("DESC");
     const [page, setPage] = useState(1);
 
     // MODAL STATES
@@ -94,6 +45,7 @@ const EmployeeList = () => {
     const [viewItem, setViewItem] = useState(null);
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
     // FORM STATE (FOR ADD / EDIT)
@@ -104,38 +56,81 @@ const EmployeeList = () => {
         department: "Engineering",
         email: "",
         phone: "",
+        password: "",
         status: "ACTIVE",
     });
 
     const itemsPerPage = 8;
 
-    // ================= FETCH EMPLOYEES FROM API =================
+    // ================= INITIAL LOAD =================
     useEffect(() => {
-        fetchData();
+        fetchCompany();
     }, []);
 
-    const fetchData = async () => {
+    // Re-fetch when sortBy or order or status changes
+    useEffect(() => {
+        fetchData();
+    }, [sortBy, order, filterStatus]);
+
+    const fetchCompany = async () => {
+        try {
+            const res = await getCompanyProfile();
+            const cId = res?.data?.data?.company_id || res?.data?.data?.id;
+            if (cId) {
+                setCompanyId(cId);
+            }
+        } catch (err) {
+            console.log("Could not fetch company profile for company_id:", err);
+        }
+    };
+
+    // ================= FETCH EMPLOYEES FROM API =================
+    const fetchData = async (overrideParams = {}) => {
         setLoading(true);
         try {
-            const res = await getEmployees();
-            console.log("Fetched employees API response:", res?.data);
+            const currentSortBy =
+                overrideParams.sortBy !== undefined ? overrideParams.sortBy : sortBy;
+            const currentOrder =
+                overrideParams.order !== undefined ? overrideParams.order : order;
+            const currentStatus =
+                overrideParams.filterStatus !== undefined
+                    ? overrideParams.filterStatus
+                    : filterStatus;
+            const currentQuery =
+                overrideParams.query !== undefined ? overrideParams.query : query;
+
+            const params = {};
+            if (currentQuery && currentQuery.trim()) {
+                params.search = currentQuery.trim();
+            }
+            if (currentStatus && (currentStatus === "ACTIVE" || currentStatus === "INACTIVE")) {
+                params.status = currentStatus;
+            }
+            if (currentSortBy) {
+                params.sortBy = currentSortBy;
+            }
+            if (currentOrder) {
+                params.order = currentOrder;
+            }
+
+            const res = await getEmployees(params);
             const apiData = res?.data?.data || res?.data || [];
-            if (Array.isArray(apiData) && apiData.length > 0) {
+            if (Array.isArray(apiData)) {
                 setData(apiData);
             } else {
-                setData(fallbackEmployees);
+                setData([]);
             }
             setPage(1);
         } catch (error) {
             console.log("Employee API fetch error:", error?.response?.data || error);
-            // Fallback gracefully so table renders seamlessly
-            setData(fallbackEmployees);
+            ToastService.handleApiError(error);
+            setData([]);
         } finally {
             setLoading(false);
         }
     };
 
-    // Populate form data when editing
+    // Populate form data when editing or adding
     useEffect(() => {
         if (editItem) {
             setFormData({
@@ -145,31 +140,36 @@ const EmployeeList = () => {
                 department: editItem.department || "Engineering",
                 email: editItem.email || "",
                 phone: editItem.mobile_no || editItem.phone || "",
+                password: "",
                 status: editItem.status || "ACTIVE",
             });
         } else {
             setFormData({
                 full_name: "",
-                employee_code: `EMP-${Math.floor(100 + Math.random() * 900)}`,
+                employee_code: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
                 role: "",
                 department: "Engineering",
                 email: "",
                 phone: "",
+                password: "Emp@" + Math.floor(1000 + Math.random() * 9000),
                 status: "ACTIVE",
             });
         }
     }, [editItem, isAddModalOpen]);
 
-    // Available departments dynamically collected from data + defaults
+    // Available departments dynamically collected from live data + standard list
+    const defaultDepartments = [
+        "Engineering",
+        "Design",
+        "Management",
+        "Human Resources",
+        "Sales",
+        "Marketing",
+        "Support",
+    ];
     const departments = Array.from(
         new Set([
-            "Engineering",
-            "Design",
-            "Management",
-            "Human Resources",
-            "Sales",
-            "Marketing",
-            "Support",
+            ...defaultDepartments,
             ...data.map((d) => d.department).filter(Boolean),
         ])
     );
@@ -218,26 +218,31 @@ const EmployeeList = () => {
         );
     });
 
-    // ================= SORT =================
+    // ================= REAL-TIME SORTING =================
     const displayData = [...filteredData].sort((a, b) => {
-        const nameA = a?.full_name || a?.name || "";
-        const nameB = b?.full_name || b?.name || "";
-        const idA = Number(a?.employee_id || a?.id || 0);
-        const idB = Number(b?.employee_id || b?.id || 0);
+        if (!sortBy) return 0;
+        let valA = a?.[sortBy];
+        let valB = b?.[sortBy];
 
-        if (sort === "asc") {
-            return nameA.localeCompare(nameB);
+        if (sortBy === "full_name") {
+            valA = a?.full_name || a?.name || "";
+            valB = b?.full_name || b?.name || "";
         }
-        if (sort === "desc") {
-            return nameB.localeCompare(nameA);
+
+        if (sortBy === "employee_id" || sortBy === "company_id" || sortBy === "id") {
+            const numA = Number(valA) || 0;
+            const numB = Number(valB) || 0;
+            return order === "ASC" ? numA - numB : numB - numA;
         }
-        if (sort === "newest") {
-            return idB - idA;
+
+        if (sortBy === "created_at") {
+            const dateA = new Date(valA || 0).getTime();
+            const dateB = new Date(valB || 0).getTime();
+            return order === "ASC" ? dateA - dateB : dateB - dateA;
         }
-        if (sort === "oldest") {
-            return idA - idB;
-        }
-        return 0;
+
+        const cmp = String(valA || "").localeCompare(String(valB || ""));
+        return order === "ASC" ? cmp : -cmp;
     });
 
     // ================= PAGINATION =================
@@ -257,85 +262,143 @@ const EmployeeList = () => {
             return;
         }
 
-        if (editItem) {
-            // EDIT
-            const updated = {
-                ...editItem,
-                full_name: formData.full_name,
-                name: formData.full_name,
-                employee_code: formData.employee_code,
-                role: formData.role,
-                designation: formData.role,
-                department: formData.department,
-                email: formData.email,
-                phone: formData.phone,
-                mobile_no: formData.phone,
-                status: formData.status,
-            };
+        if (!editItem) {
+            if (!formData.phone.trim()) {
+                toast.error("Mobile number is required");
+                return;
+            }
+            if (!formData.password.trim()) {
+                toast.error("Password is required for employee account");
+                return;
+            }
+        }
 
-            // Attempt status API update if status changed
-            if (editItem.status !== formData.status && (editItem.employee_id || editItem.id)) {
-                try {
-                    await updateEmployeeStatus(
-                        editItem.employee_id || editItem.id,
+        setSubmitting(true);
+        try {
+            if (editItem) {
+                // EDIT STATUS (via PATCH /api/employees/:id/status)
+                const empId = editItem.employee_id || editItem.id;
+                if (editItem.status !== formData.status && empId) {
+                    const statusRes = await updateEmployeeStatus(
+                        empId,
                         formData.status
                     );
-                } catch (err) {
-                    console.log("Status API update note:", err?.message);
+                    if (statusRes?.data?.success === false) {
+                        toast.error(
+                            statusRes?.data?.message || "Failed to update employee status"
+                        );
+                        setSubmitting(false);
+                        return;
+                    }
+                }
+
+                toast.success("Employee status updated successfully!");
+                setEditItem(null);
+                fetchData();
+            } else {
+                // CREATE EMPLOYEE (POST /api/auth/create)
+                let cId = companyId;
+                if (!cId) {
+                    try {
+                        const cRes = await getCompanyProfile();
+                        cId = cRes?.data?.data?.company_id || cRes?.data?.data?.id;
+                        if (cId) setCompanyId(cId);
+                    } catch (cErr) {
+                        console.error("Could not fetch company_id", cErr);
+                    }
+                }
+
+                if (!cId) {
+                    toast.error("Unable to identify Company ID. Please reload page.");
+                    setSubmitting(false);
+                    return;
+                }
+
+                const payload = {
+                    company_id: Number(cId),
+                    employee_code: formData.employee_code.trim(),
+                    full_name: formData.full_name.trim(),
+                    mobile_no: formData.phone.trim(),
+                    email: formData.email.trim(),
+                    password: formData.password.trim(),
+                };
+
+                const createRes = await createEmployee(payload);
+
+                if (
+                    createRes?.data?.success === true ||
+                    createRes?.status === 200 ||
+                    createRes?.status === 201
+                ) {
+                    const newEmpId =
+                        createRes?.data?.data?.employee_id ||
+                        createRes?.data?.data?.id;
+
+                    // If inactive status was selected upon creation, update it
+                    if (formData.status === "INACTIVE" && newEmpId) {
+                        try {
+                            await updateEmployeeStatus(newEmpId, "INACTIVE");
+                        } catch (sErr) {
+                            console.log("Status update error after create:", sErr);
+                        }
+                    }
+
+                    toast.success(
+                        createRes?.data?.message || "Employee created successfully!"
+                    );
+                    setIsAddModalOpen(false);
+                    fetchData();
+                } else {
+                    toast.error(
+                        createRes?.data?.message || "Failed to create employee"
+                    );
                 }
             }
-
-            setData((prev) =>
-                prev.map((emp) =>
-                    (emp.employee_id || emp.id) === (editItem.employee_id || editItem.id)
-                        ? updated
-                        : emp
-                )
-            );
-
-            toast.success("Employee updated successfully!");
-            setEditItem(null);
-        } else {
-            // CREATE
-            const newId = Date.now();
-            const newEmp = {
-                id: newId,
-                employee_id: newId,
-                full_name: formData.full_name,
-                name: formData.full_name,
-                employee_code: formData.employee_code || `EMP-${Math.floor(100 + Math.random() * 900)}`,
-                role: formData.role || "Staff",
-                designation: formData.role || "Staff",
-                department: formData.department || "Engineering",
-                email: formData.email,
-                phone: formData.phone,
-                mobile_no: formData.phone,
-                status: formData.status || "ACTIVE",
-            };
-
-            setData((prev) => [newEmp, ...prev]);
-            toast.success("Employee added successfully!");
-            setIsAddModalOpen(false);
+        } catch (error) {
+            console.error("Save employee error:", error);
+            ToastService.handleApiError(error);
+        } finally {
+            setSubmitting(false);
         }
     };
 
-    // ================= DELETE EMPLOYEE =================
+    // ================= DEACTIVATE EMPLOYEE =================
     const handleDeleteConfirm = async () => {
         if (!deleteItem) return;
         setDeleting(true);
 
         try {
             const delId = deleteItem.employee_id || deleteItem.id;
-            setData((prev) =>
-                prev.filter((d) => (d.employee_id || d.id) !== delId)
-            );
-            toast.success("Employee deleted successfully!");
-            setDeleteItem(null);
+            const res = await updateEmployeeStatus(delId, "INACTIVE");
+            if (res?.data?.success === false) {
+                toast.error(res?.data?.message || "Failed to deactivate employee");
+            } else {
+                toast.success("Employee marked as INACTIVE successfully!");
+                setDeleteItem(null);
+                fetchData();
+            }
         } catch (error) {
-            console.log(error);
-            toast.error("Failed to delete employee");
+            console.log("Deactivate error:", error);
+            ToastService.handleApiError(error);
         } finally {
             setDeleting(false);
+        }
+    };
+
+    // ================= VERIFY EMPLOYEE =================
+    const handleVerifyConfirm = async (item) => {
+        const empId = item?.employee_id || item?.id;
+        if (!empId) return;
+        try {
+            const res = await verifyEmployee(empId);
+            if (res?.data?.success === false) {
+                toast.error(res?.data?.message || "Failed to verify employee");
+            } else {
+                toast.success(res?.data?.message || "Employee verified successfully!");
+                fetchData();
+            }
+        } catch (error) {
+            ToastService.handleApiError(error);
         }
     };
 
@@ -350,8 +413,10 @@ const EmployeeList = () => {
                 <div
                     className="es-modal-overlay"
                     onClick={() => {
-                        setIsAddModalOpen(false);
-                        setEditItem(null);
+                        if (!submitting) {
+                            setIsAddModalOpen(false);
+                            setEditItem(null);
+                        }
                     }}
                 >
                     <div
@@ -361,17 +426,18 @@ const EmployeeList = () => {
                         <div className="es-modal__header">
                             <div>
                                 <div className="es-modal__title">
-                                    {editItem ? "Edit Employee" : "Add Employee"}
+                                    {editItem ? "Edit Employee Status" : "Add Employee"}
                                 </div>
                                 <div className="es-modal__sub">
                                     {editItem
-                                        ? "Update employee profile"
-                                        : "Create a new employee profile"}
+                                        ? "Update employee profile status"
+                                        : "Register a new dynamic employee in the system"}
                                 </div>
                             </div>
                             <button
                                 type="button"
                                 className="es-modal__close"
+                                disabled={submitting}
                                 onClick={() => {
                                     setIsAddModalOpen(false);
                                     setEditItem(null);
@@ -387,13 +453,14 @@ const EmployeeList = () => {
                                     {/* FULL NAME */}
                                     <div>
                                         <label className="es-modal__label">
-                                            Employee Name
+                                            Employee Name *
                                         </label>
                                         <input
                                             type="text"
                                             className="es-input"
                                             placeholder="Enter employee full name"
                                             value={formData.full_name}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
@@ -408,19 +475,21 @@ const EmployeeList = () => {
                                     {/* EMPLOYEE CODE */}
                                     <div>
                                         <label className="es-modal__label">
-                                            Employee Code
+                                            Employee Code *
                                         </label>
                                         <input
                                             type="text"
                                             className="es-input"
-                                            placeholder="e.g. EMP-064"
+                                            placeholder="e.g. EMP-1024"
                                             value={formData.employee_code}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
                                                     employee_code: e.target.value,
                                                 })
                                             }
+                                            required
                                             style={{ width: "100%" }}
                                         />
                                     </div>
@@ -433,15 +502,15 @@ const EmployeeList = () => {
                                         <input
                                             type="text"
                                             className="es-input"
-                                            placeholder="e.g. Frontend Developer"
+                                            placeholder="e.g. Software Engineer"
                                             value={formData.role}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
                                                     role: e.target.value,
                                                 })
                                             }
-                                            required
                                             style={{ width: "100%" }}
                                         />
                                     </div>
@@ -454,6 +523,7 @@ const EmployeeList = () => {
                                         <select
                                             className="es-select"
                                             value={formData.department}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
@@ -473,13 +543,14 @@ const EmployeeList = () => {
                                     {/* EMAIL */}
                                     <div>
                                         <label className="es-modal__label">
-                                            Email Address
+                                            Email Address *
                                         </label>
                                         <input
                                             type="email"
                                             className="es-input"
                                             placeholder="Enter email address"
                                             value={formData.email}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
@@ -494,27 +565,56 @@ const EmployeeList = () => {
                                     {/* MOBILE */}
                                     <div>
                                         <label className="es-modal__label">
-                                            Mobile / Phone
+                                            Mobile / Phone (10 digits) *
                                         </label>
                                         <input
                                             type="tel"
                                             className="es-input"
-                                            placeholder="Enter 10-digit phone"
+                                            placeholder="Enter 10-digit mobile"
+                                            maxLength={10}
                                             value={formData.phone}
+                                            disabled={!!editItem}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
                                                     phone: e.target.value,
                                                 })
                                             }
+                                            required
                                             style={{ width: "100%" }}
                                         />
                                     </div>
 
+                                    {/* PASSWORD FOR NEW EMPLOYEE */}
+                                    {!editItem && (
+                                        <div style={{ gridColumn: "1 / -1" }}>
+                                            <label className="es-modal__label">
+                                                Account Password *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="es-input"
+                                                placeholder="Set employee login password"
+                                                value={formData.password}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        password: e.target.value,
+                                                    })
+                                                }
+                                                required
+                                                style={{ width: "100%" }}
+                                            />
+                                            <span style={{ fontSize: "12px", color: "var(--gray-500)", marginTop: "4px", display: "block" }}>
+                                                Password for employee portal login credentials
+                                            </span>
+                                        </div>
+                                    )}
+
                                     {/* STATUS */}
                                     <div style={{ gridColumn: "1 / -1" }}>
                                         <label className="es-modal__label">
-                                            Status
+                                            Account Status
                                         </label>
                                         <select
                                             className="es-select"
@@ -528,7 +628,6 @@ const EmployeeList = () => {
                                             style={{ width: "100%" }}
                                         >
                                             <option value="ACTIVE">Active</option>
-                                            <option value="On Leave">On Leave</option>
                                             <option value="INACTIVE">Inactive</option>
                                         </select>
                                     </div>
@@ -539,6 +638,7 @@ const EmployeeList = () => {
                                 <button
                                     type="button"
                                     className="es-btn es-btn--ghost"
+                                    disabled={submitting}
                                     onClick={() => {
                                         setIsAddModalOpen(false);
                                         setEditItem(null);
@@ -549,8 +649,13 @@ const EmployeeList = () => {
                                 <button
                                     type="submit"
                                     className="es-btn es-btn--primary"
+                                    disabled={submitting}
                                 >
-                                    {editItem ? "Update Employee" : "Save Employee"}
+                                    {submitting
+                                        ? "Saving..."
+                                        : editItem
+                                        ? "Update Status"
+                                        : "Save Employee"}
                                 </button>
                             </div>
                         </form>
@@ -573,7 +678,7 @@ const EmployeeList = () => {
                         <div className="es-modal__header">
                             <div>
                                 <div className="es-modal__title">
-                                    Employee Details
+                                    Employee Profile
                                 </div>
                                 <div className="es-modal__sub">
                                     ID: {viewItem?.employee_id || viewItem?.id}
@@ -622,7 +727,7 @@ const EmployeeList = () => {
                                         Department
                                     </div>
                                     <div className="es-modal__value">
-                                        {viewItem?.department || "—"}
+                                        {viewItem?.department || "General"}
                                     </div>
                                 </div>
 
@@ -647,8 +752,6 @@ const EmployeeList = () => {
                                             className={`es-emp-badge ${
                                                 String(viewItem?.status).toUpperCase() === "ACTIVE"
                                                     ? "es-emp-badge--active"
-                                                    : String(viewItem?.status).toLowerCase().includes("leave")
-                                                    ? "es-emp-badge--leave"
                                                     : "es-emp-badge--inactive"
                                             }`}
                                         >
@@ -659,15 +762,51 @@ const EmployeeList = () => {
                                 </div>
 
                                 <div className="es-modal__field">
+                                    <div className="es-modal__label">Verification Status</div>
+                                    <div className="es-modal__value">
+                                        {viewItem?.emp_verified ? (
+                                            <span style={{ color: "#059669", fontWeight: 600 }}>
+                                                ✓ Verified
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: "#d97706", fontWeight: 600 }}>
+                                                Pending Verification
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="es-modal__field">
                                     <div className="es-modal__label">Company ID</div>
                                     <div className="es-modal__value">
-                                        {viewItem?.company_id || "—"}
+                                        {viewItem?.company_id || companyId || "—"}
+                                    </div>
+                                </div>
+
+                                <div className="es-modal__field">
+                                    <div className="es-modal__label">Created At</div>
+                                    <div className="es-modal__value">
+                                        {viewItem?.created_at
+                                            ? new Date(viewItem.created_at).toLocaleDateString()
+                                            : "—"}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="es-modal__footer">
+                            {!viewItem?.emp_verified && (
+                                <button
+                                    type="button"
+                                    className="es-btn es-btn--primary"
+                                    onClick={() => {
+                                        handleVerifyConfirm(viewItem);
+                                        setViewItem(null);
+                                    }}
+                                >
+                                    <FaCircleCheck /> Verify Employee
+                                </button>
+                            )}
                             <button
                                 className="es-btn es-btn--ghost"
                                 onClick={() => setViewItem(null)}
@@ -675,14 +814,12 @@ const EmployeeList = () => {
                                 Close
                             </button>
                         </div>
-
-
                     </div>
                 </div>
             )}
 
             {/* =================================================
-                DELETE MODAL
+                DEACTIVATE CONFIRMATION MODAL
             ================================================= */}
             {deleteItem && (
                 <div
@@ -706,18 +843,18 @@ const EmployeeList = () => {
                         </div>
 
                         <div className="es-modal__body es-modal__body--center">
-                            <div className="es-modal__title">Delete Employee?</div>
+                            <div className="es-modal__title">Deactivate Employee?</div>
                             <div
                                 className="es-modal__sub"
                                 style={{ marginTop: "8px", fontSize: "15px" }}
                             >
-                                Are you sure you want to delete{" "}
+                                Are you sure you want to deactivate{" "}
                                 <strong>
                                     {deleteItem?.full_name || deleteItem?.name}
                                 </strong>
                                 ?
                                 <br />
-                                This action cannot be undone.
+                                Their status will be set to <strong>INACTIVE</strong> in the database.
                             </div>
                         </div>
 
@@ -734,7 +871,7 @@ const EmployeeList = () => {
                                 onClick={handleDeleteConfirm}
                                 disabled={deleting}
                             >
-                                {deleting ? "Deleting..." : "Yes, Delete"}
+                                {deleting ? "Deactivating..." : "Yes, Deactivate"}
                             </button>
                         </div>
                     </div>
@@ -742,24 +879,35 @@ const EmployeeList = () => {
             )}
 
             {/* =================================================
-                HEADER
+                PAGE HEADER
             ================================================= */}
             <div className="es-page-header">
                 <div>
                     <div className="es-page-title">Employees</div>
                     <div className="es-page-subtitle">
-                        {query.trim() || filterDepartment || filterStatus
+                        {loading
+                            ? "Loading dynamic employees..."
+                            : query.trim() || filterDepartment || filterStatus
                             ? `${displayData.length} result${displayData.length !== 1 ? "s" : ""} found`
                             : `${data.length} total employees`}
                     </div>
                 </div>
 
-                <button
-                    className="es-btn es-btn--primary"
-                    onClick={() => setIsAddModalOpen(true)}
-                >
-                    + Add employee
-                </button>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                        className="es-btn es-btn--ghost"
+                        onClick={() => fetchData()}
+                        title="Refresh List"
+                    >
+                        <FaArrowsRotate className={loading ? "fa-spin" : ""} /> Refresh
+                    </button>
+                    <button
+                        className="es-btn es-btn--primary"
+                        onClick={() => setIsAddModalOpen(true)}
+                    >
+                        <FaUserPlus /> Add Employee
+                    </button>
+                </div>
             </div>
 
             {/* =================================================
@@ -769,6 +917,7 @@ const EmployeeList = () => {
                 className="es-search-bar"
                 style={{ marginBottom: "16px" }}
             >
+                {/* SEARCH INPUT */}
                 <div className="es-input-wrap">
                     <FaMagnifyingGlass className="es-input-icon" />
                     <input
@@ -780,10 +929,11 @@ const EmployeeList = () => {
                             setQuery(e.target.value);
                             setPage(1);
                         }}
-                        style={{ minWidth: "340px" }}
+                        style={{ minWidth: "280px" }}
                     />
                 </div>
 
+                {/* DEPARTMENT FILTER */}
                 <select
                     className="es-select"
                     value={filterDepartment}
@@ -800,6 +950,7 @@ const EmployeeList = () => {
                     ))}
                 </select>
 
+                {/* STATUS FILTER */}
                 <select
                     className="es-select"
                     value={filterStatus}
@@ -810,20 +961,42 @@ const EmployeeList = () => {
                 >
                     <option value="">All Status</option>
                     <option value="ACTIVE">Active</option>
-                    <option value="On Leave">On Leave</option>
                     <option value="INACTIVE">Inactive</option>
                 </select>
 
+                {/* SORT BY FIELD (QUERY: employee_id, company_id, employee_code, full_name, email, status, created_at) */}
                 <select
                     className="es-select"
-                    value={sort}
-                    onChange={(e) => setSort(e.target.value)}
+                    value={sortBy}
+                    onChange={(e) => {
+                        setSortBy(e.target.value);
+                        setPage(1);
+                    }}
+                    title="Sort by field"
+                    style={{ fontWeight: 600 }}
                 >
-                    <option value="">Order</option>
-                    <option value="asc">Name A → Z</option>
-                    <option value="desc">Name Z → A</option>
-                    <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
+                    <option value="created_at">Sort By: Created Date</option>
+                    <option value="employee_id">Sort By: Employee ID</option>
+                    <option value="company_id">Sort By: Company ID</option>
+                    <option value="employee_code">Sort By: Employee Code</option>
+                    <option value="full_name">Sort By: Full Name</option>
+                    <option value="email">Sort By: Email</option>
+                    <option value="status">Sort By: Status</option>
+                </select>
+
+                {/* ORDER DIRECTION (QUERY: DESC, ASC) */}
+                <select
+                    className="es-select"
+                    value={order}
+                    onChange={(e) => {
+                        setOrder(e.target.value);
+                        setPage(1);
+                    }}
+                    title="Sort order direction"
+                    style={{ fontWeight: 600 }}
+                >
+                    <option value="DESC">Order: Descending (↓)</option>
+                    <option value="ASC">Order: Ascending (↑)</option>
                 </select>
             </div>
 
@@ -838,25 +1011,63 @@ const EmployeeList = () => {
                             <th>Role &amp; Department</th>
                             <th>Email / Phone</th>
                             <th>Status</th>
+                            <th>Verified</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {currentData.length === 0 ? (
+                        {loading ? (
                             <tr>
                                 <td
-                                    colSpan={5}
+                                    colSpan={6}
                                     style={{
                                         textAlign: "center",
                                         padding: "60px",
-                                        color: "var(--gray-400)",
+                                        color: "var(--gray-500)",
                                         fontSize: "15px",
                                     }}
                                 >
-                                    {query.trim() || filterDepartment || filterStatus
-                                        ? `No results for current search filters`
-                                        : "No employees found"}
+                                    <FaArrowsRotate
+                                        className="fa-spin"
+                                        style={{ marginRight: "8px", fontSize: "16px" }}
+                                    />
+                                    Loading dynamic employees from server...
+                                </td>
+                            </tr>
+                        ) : currentData.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={6}
+                                    style={{
+                                        textAlign: "center",
+                                        padding: "60px 20px",
+                                        color: "var(--gray-500)",
+                                        fontSize: "15px",
+                                    }}
+                                >
+                                    <div style={{ marginBottom: "12px", fontSize: "32px", color: "var(--gray-400)" }}>
+                                        👥
+                                    </div>
+                                    <div style={{ fontWeight: 600, fontSize: "16px", color: "var(--gray-700)", marginBottom: "6px" }}>
+                                        {query.trim() || filterDepartment || filterStatus
+                                            ? "No employees match your search criteria"
+                                            : "No employees registered yet"}
+                                    </div>
+                                    <div style={{ fontSize: "14px", color: "var(--gray-400)", marginBottom: "16px" }}>
+                                        {query.trim() || filterDepartment || filterStatus
+                                            ? "Try adjusting your search query or status filter."
+                                            : "Add your first employee to dynamically track attendance, roles, and profiles."}
+                                    </div>
+                                    {!query.trim() && !filterDepartment && !filterStatus && (
+                                        <button
+                                            type="button"
+                                            className="es-btn es-btn--primary"
+                                            onClick={() => setIsAddModalOpen(true)}
+                                        >
+                                            <FaUserPlus /> Add First Employee
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ) : (
@@ -869,6 +1080,7 @@ const EmployeeList = () => {
                                 const empEmail = item?.email || "—";
                                 const empPhone = item?.mobile_no || item?.phone || "—";
                                 const empStatus = item?.status || "ACTIVE";
+                                const isVerified = !!item?.emp_verified;
 
                                 return (
                                     <tr key={empId}>
@@ -909,14 +1121,41 @@ const EmployeeList = () => {
                                                 className={`es-emp-badge ${
                                                     String(empStatus).toUpperCase() === "ACTIVE"
                                                         ? "es-emp-badge--active"
-                                                        : String(empStatus).toLowerCase().includes("leave")
-                                                        ? "es-emp-badge--leave"
                                                         : "es-emp-badge--inactive"
                                                 }`}
                                             >
                                                 <span className="es-emp-status-dot"></span>
                                                 {empStatus}
                                             </span>
+                                        </td>
+
+                                        {/* VERIFIED */}
+                                        <td data-label="Verified">
+                                            {isVerified ? (
+                                                <span
+                                                    className="es-emp-badge es-emp-badge--active"
+                                                    style={{ fontSize: "11px", padding: "2px 8px" }}
+                                                    title="Employee Verified"
+                                                >
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="es-btn es-btn--ghost"
+                                                    style={{
+                                                        height: "26px",
+                                                        fontSize: "11px",
+                                                        padding: "0 8px",
+                                                        color: "#d97706",
+                                                        borderColor: "#fde68a",
+                                                    }}
+                                                    onClick={() => handleVerifyConfirm(item)}
+                                                    title="Click to verify this employee"
+                                                >
+                                                    Verify Now
+                                                </button>
+                                            )}
                                         </td>
 
                                         {/* ACTIONS */}
@@ -926,27 +1165,27 @@ const EmployeeList = () => {
                                                 <button
                                                     type="button"
                                                     className="tbl-action-btn tbl-action-btn--view"
-                                                    title="View"
+                                                    title="View Profile"
                                                     onClick={() => setViewItem(item)}
                                                 >
                                                     <FaEye />
                                                 </button>
 
-                                                {/* EDIT */}
+                                                {/* EDIT STATUS */}
                                                 <button
                                                     type="button"
                                                     className="tbl-action-btn tbl-action-btn--edit"
-                                                    title="Edit"
+                                                    title="Edit Status"
                                                     onClick={() => setEditItem(item)}
                                                 >
                                                     <FaPen />
                                                 </button>
 
-                                                {/* DELETE */}
+                                                {/* DEACTIVATE */}
                                                 <button
                                                     type="button"
                                                     className="tbl-action-btn tbl-action-btn--delete"
-                                                    title="Delete"
+                                                    title="Deactivate Employee"
                                                     onClick={() => setDeleteItem(item)}
                                                 >
                                                     <FaTrash />

@@ -5,7 +5,9 @@ import {
     FaTrash,
     FaEye,
     FaXmark,
-    FaTriangleExclamation
+    FaTriangleExclamation,
+    FaArrowsRotate,
+    FaUserPlus,
 } from "react-icons/fa6";
 
 import {
@@ -20,8 +22,10 @@ import AddProduct from "./AddProduct";
 const ProductList = () => {
 
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [query, setQuery] = useState("");
-    const [sort, setSort] = useState("");
+    const [sortBy, setSortBy] = useState("created_at");
+    const [order, setOrder] = useState("DESC");
     const [page, setPage] = useState(1);
 
     const [cities, setCities] = useState([]);
@@ -49,25 +53,37 @@ const ProductList = () => {
 
     useEffect(() => {
         fetchedData();
-    }, [sort]);
+    }, [sortBy, order, filterCity, filterState]);
 
 
-    const fetchedData = async () => {
+    const fetchedData = async (overrideParams = {}) => {
+        setLoading(true);
         try {
+            const currentSortBy = overrideParams.sortBy !== undefined ? overrideParams.sortBy : sortBy;
+            const currentOrder = overrideParams.order !== undefined ? overrideParams.order : order;
+            const currentCity = overrideParams.filterCity !== undefined ? overrideParams.filterCity : filterCity;
+            const currentState = overrideParams.filterState !== undefined ? overrideParams.filterState : filterState;
+            const currentQuery = overrideParams.query !== undefined ? overrideParams.query : query;
 
-            const res = await getCustomerList("", sort);
-            console.log(res);
-            
+            const params = {};
+            if (currentQuery && currentQuery.trim()) params.search = currentQuery.trim();
+            if (currentCity) params.city = currentCity;
+            if (currentState) params.state = currentState;
+            if (currentSortBy) params.sortBy = currentSortBy;
+            if (currentOrder) params.order = currentOrder;
 
+            const res = await getCustomerList(params);
             const sortData = res?.data?.data || [];
 
-            setData(sortData);
+            setData(Array.isArray(sortData) ? sortData : []);
             setPage(1);
 
         } catch (error) {
 
             console.log(error?.response?.data);
 
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -153,25 +169,33 @@ const ProductList = () => {
     });
 
 
-    // ================= CITY / STATE SORT =================
+    // ================= SORTING =================
 
     const displayData = [...filteredData].sort((a, b) => {
 
-        if (sort === "city") {
+        if (!sortBy) return 0;
+        let valA = a?.[sortBy];
+        let valB = b?.[sortBy];
 
-            return (a?.city || "")
-                .localeCompare(b?.city || "");
-
+        if (sortBy === "full_name") {
+            valA = a?.customer_name || a?.full_name || a?.name || "";
+            valB = b?.customer_name || b?.full_name || b?.name || "";
         }
 
-        if (sort === "state") {
-
-            return (a?.state || "")
-                .localeCompare(b?.state || "");
-
+        if (sortBy === "employee_id" || sortBy === "id" || sortBy === "company_id") {
+            const numA = Number(valA || a?.id) || 0;
+            const numB = Number(valB || b?.id) || 0;
+            return order === "ASC" ? numA - numB : numB - numA;
         }
 
-        return 0;
+        if (sortBy === "created_at") {
+            const dateA = new Date(valA || 0).getTime();
+            const dateB = new Date(valB || 0).getTime();
+            return order === "ASC" ? dateA - dateB : dateB - dateA;
+        }
+
+        const cmp = String(valA || "").localeCompare(String(valB || ""));
+        return order === "ASC" ? cmp : -cmp;
 
     });
 
@@ -603,34 +627,36 @@ const ProductList = () => {
             ================================================= */}
 
             <div className="es-page-header">
-
                 <div>
-
                     <div className="es-page-title">
                         Customers
                     </div>
-
                     <div className="es-page-subtitle">
-
-                        {query.trim()
+                        {loading
+                            ? "Loading dynamic customer directory..."
+                            : query.trim() || filterCity || filterState
                             ? `${displayData.length} result${displayData.length !== 1 ? "s" : ""} found`
-                            : `${data.length} total customers`
-                        }
-
+                            : `${data.length} total customers`}
                     </div>
-
                 </div>
 
-
-                <button
-                    className="es-btn es-btn--primary"
-                    onClick={() =>
-                        setIsAddModalOpen(true)
-                    }
-                >
-                    + Add customer
-                </button>
-
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                        type="button"
+                        className="es-btn es-btn--ghost"
+                        onClick={() => fetchedData()}
+                        title="Refresh List"
+                    >
+                        <FaArrowsRotate className={loading ? "fa-spin" : ""} /> Refresh
+                    </button>
+                    <button
+                        type="button"
+                        className="es-btn es-btn--primary"
+                        onClick={() => setIsAddModalOpen(true)}
+                    >
+                        <FaUserPlus /> Add Customer
+                    </button>
+                </div>
             </div>
 
 
@@ -728,26 +754,39 @@ const ProductList = () => {
                 </select>
 
 
+                {/* SORT BY FIELD */}
                 <select
                     className="es-select"
-                    value={sort}
-                    onChange={(e) =>
-                        setSort(e.target.value)
-                    }
+                    value={sortBy}
+                    onChange={(e) => {
+                        setSortBy(e.target.value);
+                        setPage(1);
+                    }}
+                    title="Sort by field"
+                    style={{ fontWeight: 600 }}
                 >
+                    <option value="created_at">Sort By: Created Date</option>
+                    <option value="employee_id">Sort By: ID / Customer ID</option>
+                    <option value="company_id">Sort By: Company ID</option>
+                    <option value="employee_code">Sort By: Code</option>
+                    <option value="full_name">Sort By: Full Name</option>
+                    <option value="email">Sort By: Email</option>
+                    <option value="status">Sort By: Status</option>
+                </select>
 
-                    <option value="">
-                        Order
-                    </option>
-
-                    <option value="asc">
-                        Name A → Z
-                    </option>
-
-                    <option value="desc">
-                        Name Z → A
-                    </option>
-
+                {/* ORDER DIRECTION */}
+                <select
+                    className="es-select"
+                    value={order}
+                    onChange={(e) => {
+                        setOrder(e.target.value);
+                        setPage(1);
+                    }}
+                    title="Sort order direction"
+                    style={{ fontWeight: 600 }}
+                >
+                    <option value="DESC">Order: Descending (↓)</option>
+                    <option value="ASC">Order: Ascending (↑)</option>
                 </select>
 
             </div>
@@ -758,63 +797,71 @@ const ProductList = () => {
             ================================================= */}
 
             <div className="es-table-wrap">
-
                 <table className="es-table">
-
                     <thead>
-
                         <tr>
-
-                            <th>
-                                ID &amp; Customer Name
-                            </th>
-
-                            <th>
-                                ID & Customer Name
-                            </th>
-
-                            <th>
-                                Email / Phone
-                            </th>
-
-                            <th>
-                                City / State
-                            </th>
-
-                            <th>
-                                Actions
-                            </th>
-
+                            <th>ID &amp; Customer Name</th>
+                            <th>Company / Organization</th>
+                            <th>Email / Phone</th>
+                            <th>City / State</th>
+                            <th>Actions</th>
                         </tr>
-
                     </thead>
 
-
                     <tbody>
-
-                        {currentData.length === 0 ? (
-
+                        {loading ? (
                             <tr>
-
                                 <td
                                     colSpan={5}
                                     style={{
                                         textAlign: "center",
                                         padding: "60px",
-                                        color: "var(--gray-400)",
-                                        fontSize: "15px"
+                                        color: "var(--gray-500)",
+                                        fontSize: "15px",
                                     }}
                                 >
-
-                                    {query.trim()
-                                        ? `No results for "${query}"`
-                                        : "No customers found"
-                                    }
-
+                                    <FaArrowsRotate
+                                        className="fa-spin"
+                                        style={{ marginRight: "8px", fontSize: "16px" }}
+                                    />
+                                    Loading dynamic customer directory from server...
                                 </td>
-
                             </tr>
-
+                        ) : currentData.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={5}
+                                    style={{
+                                        textAlign: "center",
+                                        padding: "60px 20px",
+                                        color: "var(--gray-500)",
+                                        fontSize: "15px",
+                                    }}
+                                >
+                                    <div style={{ marginBottom: "12px", fontSize: "32px", color: "var(--gray-400)" }}>
+                                        🏪
+                                    </div>
+                                    <div style={{ fontWeight: 600, fontSize: "16px", color: "var(--gray-700)", marginBottom: "6px" }}>
+                                        {query.trim() || filterCity || filterState
+                                            ? "No customers match your search criteria"
+                                            : "No customer accounts registered yet"}
+                                    </div>
+                                    <div style={{ fontSize: "14px", color: "var(--gray-400)", marginBottom: "16px" }}>
+                                        {query.trim() || filterCity || filterState
+                                            ? "Try adjusting your search query, city, or state filter."
+                                            : "Onboard your first customer to manage contacts, orders, and addresses."}
+                                    </div>
+                                    {!query.trim() && !filterCity && !filterState && (
+                                        <button
+                                            type="button"
+                                            className="es-btn es-btn--primary"
+                                            onClick={() => setIsAddModalOpen(true)}
+                                        >
+                                            <FaUserPlus /> Add First Customer
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
                         ) : (
 
                             currentData.map((item, ind) => (

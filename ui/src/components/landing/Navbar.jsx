@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+    FaChartPie,
+    FaUserGroup,
+    FaStore,
+    FaBuilding,
+    FaRightFromBracket,
+} from 'react-icons/fa6';
 
 const Navbar = () => {
     const lock = useLocation();
@@ -24,7 +31,7 @@ const Navbar = () => {
         <nav className="es-navbar">
             <Link to="/dashboard" className="es-navbar__brand">
                 <div className="es-navbar__avatar">ES</div>
-                Elation Softnet
+                <span>Elation Softnet</span>
             </Link>
 
             <ul className="es-navbar__links">
@@ -32,17 +39,20 @@ const Navbar = () => {
                     <>
                         <li>
                             <Link to="/dashboard" className={isActive('/dashboard')}>
-                                Dashboard
+                                <FaChartPie style={{ fontSize: '14px' }} />
+                                <span>Dashboard</span>
                             </Link>
                         </li>
                         <li>
                             <Link to="/employees" className={isActive('/employees')}>
-                                Employees
+                                <FaUserGroup style={{ fontSize: '14px' }} />
+                                <span>Employees</span>
                             </Link>
                         </li>
                         <li>
                             <Link to="/listProduct" className={isActive('/listProduct')}>
-                                Customers
+                                <FaStore style={{ fontSize: '14px' }} />
+                                <span>Customers</span>
                             </Link>
                         </li>
                         <li>
@@ -50,11 +60,10 @@ const Navbar = () => {
                                 to="/company-profile"
                                 className={isActive("/company-profile")}
                             >
-                                Company Profile
+                                <FaBuilding style={{ fontSize: '14px' }} />
+                                <span>Company Profile</span>
                             </Link>
                         </li>
-
-
 
                         <li>
                             <Link
@@ -62,7 +71,8 @@ const Navbar = () => {
                                 to="/"
                                 className="es-navbar__link es-navbar__link--logout"
                             >
-                                Logout
+                                <FaRightFromBracket style={{ fontSize: '14px' }} />
+                                <span>Logout</span>
                             </Link>
                         </li>
                     </>

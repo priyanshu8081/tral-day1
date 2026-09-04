@@ -5,11 +5,11 @@
 .cp-page {
     min-height: calc(100vh - 60px);
     background: #f8fafc;
-    padding: 32px 24px;
+    padding: 32px 28px 48px;
 }
 
 .cp-container {
-    max-width: 1050px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
@@ -297,7 +297,183 @@
     border-top: 1px solid #f1f5f9;
 }
 
+/* ── TABS ────────────────────────────────────────── */
+.cp-tab-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 2px;
+}
+
+.cp-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px 8px 0 0;
+}
+
+.cp-tab-btn:hover {
+    color: #4f46e5;
+    background: #f1f5f9;
+}
+
+.cp-tab-btn--active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+    background: #ffffff;
+}
+
+/* ── SECURITY & PASSWORD LAYOUT ─────────────────── */
+.cp-security-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.cp-input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cp-input-left-icon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.cp-input-with-icons {
+    padding-left: 40px !important;
+    padding-right: 42px !important;
+    width: 100%;
+}
+
+.cp-eye-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 4px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.cp-eye-btn:hover {
+    color: #475569;
+    background: #f1f5f9;
+}
+
+/* Password Strength Meter */
+.cp-strength-wrap {
+    margin-top: 10px;
+}
+
+.cp-strength-bar-bg {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.cp-strength-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 4px;
+}
+
+.cp-strength-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Checklist */
+.cp-checklist {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 12px;
+}
+
+.cp-check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #64748b;
+    margin-bottom: 7px;
+    transition: color 0.2s ease;
+}
+
+.cp-check-item:last-child {
+    margin-bottom: 0;
+}
+
+.cp-check-item--passed {
+    color: #059669;
+    font-weight: 600;
+}
+
+/* Security Cards */
+.cp-security-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.cp-security-tip-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cp-security-tip-item:last-child {
+    margin-bottom: 0;
+}
+
+.cp-security-tip-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #4f46e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
 /* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+    .cp-security-layout {
+        grid-template-columns: 1fr;
+    }
+}
 @media (max-width: 900px) {
     .cp-stats-grid {
         grid-template-columns: repeat(2, 1fr);
