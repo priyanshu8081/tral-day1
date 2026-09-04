@@ -1,0 +1,345 @@
+/* =====================================================
+   COMPANY PROFILE - EXECUTIVE MODERN DESIGN SYSTEM
+===================================================== */
+
+.cp-page {
+    min-height: calc(100vh - 60px);
+    background: #f8fafc;
+    padding: 32px 24px;
+}
+
+.cp-container {
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+/* ── TOP BAR ─────────────────────────────────────── */
+.cp-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.cp-title-wrap h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.cp-title-wrap p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* ── HERO BANNER CARD ────────────────────────────── */
+.cp-hero-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.cp-banner {
+    height: 150px;
+    background: linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #818cf8 100%);
+    position: relative;
+}
+
+.cp-banner-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    background-size: 16px 16px;
+    opacity: 0.5;
+}
+
+.cp-hero-body {
+    padding: 0 32px 26px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.cp-avatar-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    margin-top: -50px;
+}
+
+.cp-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    background: #4338ca;
+    border: 4px solid #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+}
+
+.cp-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px 0;
+}
+
+.cp-sub {
+    font-size: 14px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── STATS ROW ───────────────────────────────────── */
+.cp-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.cp-stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cp-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.06);
+}
+
+.cp-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.cp-stat-icon--indigo {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.cp-stat-icon--emerald {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.cp-stat-icon--amber {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.cp-stat-icon--purple {
+    background: #faf5ff;
+    color: #9333ea;
+}
+
+.cp-stat-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.cp-stat-val {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* ── CARD & FIELDS ───────────────────────────────── */
+.cp-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    margin-bottom: 24px;
+}
+
+.cp-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cp-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.cp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.cp-item {
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: border-color 0.15s ease;
+}
+
+.cp-item:hover {
+    border-color: #cbd5e1;
+}
+
+.cp-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cp-val {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+/* ── FORM ────────────────────────────────────────── */
+.cp-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.cp-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.cp-form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.cp-form-input {
+    height: 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.cp-form-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.cp-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+    .cp-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .cp-page {
+        padding: 20px 14px;
+    }
+
+    .cp-hero-body {
+        padding: 0 18px 20px;
+        align-items: flex-start;
+    }
+
+    .cp-avatar-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        margin-top: -40px;
+    }
+
+    .cp-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 26px;
+    }
+
+    .cp-name {
+        font-size: 20px;
+    }
+
+    .cp-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cp-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cp-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

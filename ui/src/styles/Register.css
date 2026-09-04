@@ -1,0 +1,601 @@
+* {
+    box-sizing: border-box;
+}
+
+
+/* ================================
+   REGISTER PAGE
+================================ */
+
+.register-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: #f7f9fb;
+
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* ================================
+   REGISTER CARD
+================================ */
+
+.register-card {
+    width: 100%;
+    max-width: 1000px;
+    min-height: 600px;
+
+    display: flex !important;
+    flex-direction: row !important;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ================================
+   LEFT PANEL
+================================ */
+
+.left-panel {
+    width: 42%;
+
+    min-height: 600px;
+
+    padding: 35px;
+
+    background: #155c91;
+
+    color: #ffffff;
+
+    flex: 0 0 42%;
+}
+
+
+/* ================================
+   BRAND
+================================ */
+
+.brand-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    font-size: 18px;
+
+    font-weight: 600;
+}
+
+
+.brand-box {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    font-size: 14px;
+}
+
+
+/* ================================
+   LEFT CONTENT
+================================ */
+
+.left-content {
+    margin-top: 65px;
+}
+
+
+.left-content h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 34px;
+
+    line-height: 1.25;
+
+    font-weight: 700;
+}
+
+
+.left-content p {
+    margin-top: 15px;
+
+    margin-bottom: 0;
+
+    color: #cfe1ef;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+
+/* ================================
+   FEATURES
+================================ */
+
+.left-features {
+    margin-top: 80px;
+}
+
+
+.feature-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+
+    color: #eaf3f9;
+
+    font-size: 14px;
+}
+
+
+.feature-item:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ================================
+   RIGHT PANEL
+================================ */
+
+.right-panel {
+    width: 58%;
+
+    min-height: 600px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding: 35px 45px;
+
+    background: #ffffff;
+
+    flex: 0 0 58%;
+}
+
+
+/* ================================
+   FORM BOX
+================================ */
+
+.form-box {
+    width: 100%;
+
+    max-width: 600px;
+
+    margin: 0 auto;
+}
+
+
+/* ================================
+   HEADING
+================================ */
+
+.form-box h2 {
+    margin: 0;
+
+    color: #171717;
+
+    font-size: 30px;
+
+    font-weight: 700;
+}
+
+
+.subtitle {
+    margin: 7px 0 20px;
+
+    color: #8a8a8a;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* ================================
+   FORM ROW
+================================ */
+
+.form-row {
+    width: 100%;
+
+    display: flex;
+
+    gap: 20px;
+}
+
+
+.form-field {
+    width: 50%;
+
+    margin-bottom: 15px;
+}
+
+
+/* ================================
+   LABEL
+================================ */
+
+.form-box label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #222222;
+
+    font-size: 13px;
+
+    font-weight: 500;
+}
+
+
+/* ================================
+   INPUT
+================================ */
+
+.form-control {
+    width: 100%;
+
+    height: 40px;
+
+    padding: 8px 11px;
+
+    border: 1px solid #d9dfe4 !important;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+
+.form-control:focus {
+    border-color: #1765a0 !important;
+
+    box-shadow: 0 0 0 3px rgba(23, 101, 160, 0.1);
+}
+
+
+.form-control::placeholder {
+    color: #a5a5a5;
+
+    font-size: 13px;
+}
+
+
+/* ================================
+   ERROR
+================================ */
+
+.error {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #dc3545;
+
+    font-size: 11px;
+}
+
+
+/* ================================
+   LOGO
+================================ */
+
+.logo-section {
+    margin-bottom: 15px;
+}
+
+
+.upload-box {
+    width: 100%;
+
+    min-height: 58px;
+
+    display: flex !important;
+
+    align-items: center;
+
+    padding: 8px 12px;
+
+    border: 1px dashed #bfc8cf !important;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.upload-box:hover {
+    border-color: #1765a0 !important;
+
+    background: #f8fbfd;
+}
+
+
+.upload-box input {
+    display: none;
+}
+
+
+.upload-icon {
+    width: 30px;
+
+    margin-right: 12px;
+
+    color: #1765a0;
+
+    font-size: 24px;
+
+    text-align: center;
+}
+
+
+.upload-title {
+    color: #333333;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.upload-subtitle {
+    margin-top: 3px;
+
+    color: #999999;
+
+    font-size: 11px;
+}
+
+
+/* ================================
+   BUTTON
+================================ */
+
+.create-btn {
+    width: 100%;
+
+    height: 40px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #155C91;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.create-btn:hover {
+    background: #124e7d;
+}
+
+
+/* ================================
+   LOGIN
+================================ */
+
+.login-text {
+    margin-top: 13px;
+
+    color: #999999;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+.login-text a {
+    color: #1765a0;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+.login-text a:hover {
+    text-decoration: underline;
+}
+
+
+/* ================================
+   TABLET
+================================ */
+
+@media (max-width: 900px) {
+
+    .register-card {
+        max-width: 800px;
+    }
+
+    .left-panel {
+        width: 40%;
+        flex: 0 0 40%;
+
+        padding: 30px;
+    }
+
+    .right-panel {
+        width: 60%;
+        flex: 0 0 60%;
+
+        padding: 30px;
+    }
+
+    .left-content h1 {
+        font-size: 30px;
+    }
+
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 767px) {
+
+    .register-page {
+        padding: 15px;
+    }
+
+    .register-card {
+        display: block !important;
+
+        width: 100%;
+
+        min-height: auto;
+    }
+
+    .left-panel {
+        width: 100%;
+
+        min-height: auto;
+
+        padding: 30px;
+
+        display: block;
+    }
+
+    .right-panel {
+        width: 100%;
+
+        min-height: auto;
+
+        padding: 30px 25px;
+
+        display: block;
+    }
+
+    .left-content {
+        margin-top: 40px;
+    }
+
+    .left-content h1 {
+        font-size: 28px;
+    }
+
+    .left-features {
+        margin-top: 30px;
+    }
+
+    .form-box {
+        max-width: 100%;
+    }
+
+    .form-row {
+        display: block;
+    }
+
+    .form-field {
+        width: 100%;
+    }
+
+}
+
+
+/* ================================
+   SMALL MOBILE
+================================ */
+
+@media (max-width: 575px) {
+
+    .left-panel {
+        padding: 25px 20px;
+    }
+
+    .right-panel {
+        padding: 25px 20px;
+    }
+
+    .left-content {
+        margin-top: 30px;
+    }
+
+    .left-content h1 {
+        font-size: 26px;
+    }
+
+    .left-content p {
+        font-size: 13px;
+    }
+
+    .form-box h2 {
+        font-size: 26px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    .form-box label {
+        font-size: 12px;
+    }
+
+    .form-control {
+        height: 38px;
+
+        font-size: 13px;
+    }
+
+    .create-btn {
+        height: 38px;
+
+        font-size: 14px;
+    }
+
+    .feature-item {
+        font-size: 13px;
+    }
+
+    .login-text {
+        font-size: 12px;
+    }
+
+}
