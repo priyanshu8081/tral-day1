@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -7,49 +7,26 @@ import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import "../../styles/Register.css";
+import { companyNameValidation, concatPersonValidation, designationValidation, emailValidation, mobileValidation, passwordValidation } from "../../utils/Validation";
 
 const schema = yup.object().shape({
-    company_name: yup
-        .string()
-        .required("Company name is required")
-        .matches(/^[A-Za-z ]{2,}$/, "Company name contain only letters"),
+    company_name:companyNameValidation,
 
-    contact_person_name: yup
-        .string()
-        .required("Contact person is required")
-        .matches(/^[A-Za-z ]{2,}$/, "Contact person contain only letters"),
+    contact_person_name:concatPersonValidation,
 
-    designation: yup
-        .string()
-        .required("Designation is required")
-        .matches(/^[A-Za-z ]{3,}$/, "Contain only letter"),
+    designation: designationValidation,
 
-    email: yup
-        .string()
-        .required("Email is required")
-        .matches(
-            /^[A-Za-z\d%&+_-]+@[A-Za-z\d.]+\.[A-Za-z]{2,}$/,
-            "Enter valid email"
-        ),
+    email:emailValidation,
 
-    mobile: yup
-        .string()
-        .required("Mobile is required")
-        .matches(/^[6-9]\d{9}$/, "Enter valid number"),
+    mobile:mobileValidation,
 
     logo: yup.mixed(),
 
-    password: yup
-        .string()
-        .required("Password is required")
-        .matches(/[A-Z]/, "Atleast one uppercase")
-        .matches(/[a-z]/, "Atleast one lowercase")
-        .matches(/[\d]/, "Should contain one digit")
-        .matches(/[@#$%+_-]/, "Atleast one special symbol")
-        .min(8, "Minimum 8 digit password"),
+    password:passwordValidation,
 });
 
 const Register = () => {
+    const [loading,setLoading]=useState(false);
     const navigate = useNavigate();
 
     const {
@@ -62,18 +39,15 @@ const Register = () => {
 
     const handleRegister = async (data) => {
         const formData = new FormData();
-
         formData.append("company_name", data.company_name);
         formData.append("contact_person_name", data.contact_person_name);
         formData.append("designation", data.designation);
         formData.append("email", data.email);
         formData.append("mobile", data.mobile);
         formData.append("password", data.password);
-
         if (data.logo?.[0]) {
             formData.append("logo", data.logo[0]);
         }
-
         try {
             const res = await axios.post(
                 "https://app.elationsoft.net/api/companies",

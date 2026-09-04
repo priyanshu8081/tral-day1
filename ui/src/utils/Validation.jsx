@@ -10,3 +10,24 @@ export const passwordValidation = yup.string().required()
     .matches(/[a-z]/, "Atleast should be contain one lowercase")
     .matches(/[\d]/, "should be contain one digits")
     .matches(/[@#$%+_-]/, "alteast one one special symbol").min(8, "minimum 8 digit password");
+
+export const companyNameValidation = yup
+    .string()
+    .trim()
+    .required("Company name is required")
+    .matches(companyNameRegex, "Company name contains invalid characters");
+
+export const concatPersonValidation = yup
+    .string()
+    .required("Contact person is required")
+    .matches(/^[A-Za-z ]{2,}$/, "Contact person contain only letters");
+
+export const designationValidation = yup
+    .string()
+    .required("Designation is required")
+    .matches(/^[A-Za-z ]{3,}$/, "Contain only letter");
+
+export const mobileValidation= yup
+        .string()
+        .required("Mobile is required")
+        .matches(/^[6-9]\d{9}$/, "Enter valid number");

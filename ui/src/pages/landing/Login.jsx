@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -16,7 +16,7 @@ const schema = yup.object().shape({
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const [loading,setLoading]=useState(false);
     const {
         register,
         handleSubmit,
@@ -26,6 +26,8 @@ const Login = () => {
     });
 
     const handleLogin = async (data) => {
+        if(loading) return;
+        setLoading(true);
         try {
             const res = await loginUser(data);
             console.log(res)
@@ -33,7 +35,7 @@ const Login = () => {
             if (res?.data?.success === true) {
                 localStorage.setItem("token", res?.data?.data.token);
                 ToastService.success(res?.data?.message);
-                navigate("/dashboard");
+                // navigate("/dashboard");
             } else {
                 ToastService.error(res?.data?.message);
             }
@@ -189,11 +191,11 @@ const Login = () => {
 
                             {/* LOGIN */}
 
-                            <button
+                            <button  disabled={loading}
                                 type="submit"
                                 className="login-btn"
                             >
-                                Log in
+                                {loading? "Logging in...":"Login"}
                             </button>
 
                         </form>

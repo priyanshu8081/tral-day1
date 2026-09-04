@@ -26,39 +26,14 @@ import {
     editCompanyProfile,
 } from "../../services/AdminServices";
 import { ToastService } from "../../utils/ToastUtils";
-import { emailValidation } from "../../utils/Validation";
-
-const companyNameRegex = /^[A-Za-z0-9]{3}(?:[ A-Za-z0-9.&'-]*[A-Za-z0-9.])?$/;
-const personNameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
-const designationRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
-const mobileRegex = /^[6-9]\d{9}$/;
+import { companyNameValidation, concatPersonValidation, designationValidation, emailValidation, mobileValidation } from "../../utils/Validation";
 
 const schema = yup.object().shape({
-    company_name: yup
-        .string()
-        .trim()
-        .required("Company name is required")
-        .matches(companyNameRegex, "Company name contains invalid characters"),
-    contact_person_name: yup
-        .string()
-        .trim()
-        .required("Contact person name is required")
-        .matches(personNameRegex, "Only letters and spaces are allowed"),
-    designation: yup
-        .string()
-        .trim()
-        .required("Designation is required")
-        .matches(designationRegex, "Only letters and spaces are allowed"),
-    email: yup
-        .string()
-        .trim()
-        .required("Email is required")
-        .matches(emailValidation, "Enter valid email"),
-    mobile: yup
-        .string()
-        .trim()
-        .required("Mobile number is required")
-        .matches(mobileRegex, "Enter valid 10 digit mobile number"),
+    company_name: companyNameValidation,
+    contact_person_name:concatPersonValidation,
+    designation:designationValidation,
+    email: emailValidation,
+    mobile: mobileValidation,
 });
 
 const CompanyProfile = () => {
