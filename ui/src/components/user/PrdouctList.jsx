@@ -8,6 +8,7 @@ import {
     FaTriangleExclamation,
     FaArrowsRotate,
     FaUserPlus,
+    FaBuilding,
 } from "react-icons/fa6";
 
 import {
@@ -336,7 +337,25 @@ const ProductList = () => {
                         </div>
 
 
-                        <div className="es-modal__body">
+        <div className="es-modal__body">
+
+                            {/* Profile header in view modal */}
+                            <div className="view-modal-profile">
+                                <div
+                                    className="view-modal-avatar-placeholder"
+                                    style={{
+                                        background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
+                                    }}
+                                >
+                                    {(viewItem?.customer_name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                                </div>
+                                <div className="view-modal-profile-info">
+                                    <div className="view-modal-name">{viewItem?.customer_name || "—"}</div>
+                                    <div className="view-modal-code" style={{ color: "#0369a1" }}>
+                                        {viewItem?.company_name ? `🏢 ${viewItem.company_name}` : `ID: ${viewItem?.id}`}
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className="es-modal__grid">
 
@@ -623,27 +642,25 @@ const ProductList = () => {
 
 
             {/* =================================================
-                HEADER
+                HEADER — PREMIUM GRADIENT
             ================================================= */}
 
-            <div className="es-page-header">
-                <div>
-                    <div className="es-page-title">
-                        Customers
-                    </div>
+            <div className="es-page-header-premium">
+                <div style={{ position: "relative", zIndex: 1 }}>
+                    <div className="es-page-title">Customers</div>
                     <div className="es-page-subtitle">
                         {loading
                             ? "Loading dynamic customer directory..."
                             : query.trim() || filterCity || filterState
                             ? `${displayData.length} result${displayData.length !== 1 ? "s" : ""} found`
-                            : `${data.length} total customers`}
+                            : `${data.length} total customers registered`}
                     </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "10px" }}>
+                <div className="es-header-btn-group">
                     <button
                         type="button"
-                        className="es-btn es-btn--ghost"
+                        className="es-btn--header-ghost"
                         onClick={() => fetchedData()}
                         title="Refresh List"
                     >
@@ -651,7 +668,7 @@ const ProductList = () => {
                     </button>
                     <button
                         type="button"
-                        className="es-btn es-btn--primary"
+                        className="es-btn--header-primary"
                         onClick={() => setIsAddModalOpen(true)}
                     >
                         <FaUserPlus /> Add Customer
@@ -664,12 +681,7 @@ const ProductList = () => {
                 SEARCH
             ================================================= */}
 
-            <div
-                className="es-search-bar"
-                style={{
-                    marginBottom: "16px"
-                }}
-            >
+            <div className="es-search-bar-premium">
 
                 <div className="es-input-wrap">
 
@@ -796,7 +808,7 @@ const ProductList = () => {
                 TABLE
             ================================================= */}
 
-            <div className="es-table-wrap">
+            <div className="es-table-wrap-premium">
                 <table className="es-table">
                     <thead>
                         <tr>
@@ -875,15 +887,19 @@ const ProductList = () => {
                                     {/* CUSTOMER */}
 
                                     <td data-label="ID & Customer Name">
-
-                                        <div className="tbl-main">
-                                            {item?.customer_name || "—"}
+                                        <div className="emp-cell-identity">
+                                            <div
+                                                className="emp-avatar-placeholder"
+                                                data-color="1"
+                                                style={{ flexShrink: 0 }}
+                                            >
+                                                {(item?.customer_name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                                            </div>
+                                            <div className="emp-cell-identity-text">
+                                                <div className="tbl-main">{item?.customer_name || "—"}</div>
+                                                <div className="tbl-sub">ID: {item?.id || "—"}</div>
+                                            </div>
                                         </div>
-
-                                        <div className="tbl-sub">
-                                            ID: {item?.id || "—"}
-                                        </div>
-
                                     </td>
 
 

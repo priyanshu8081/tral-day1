@@ -24,6 +24,7 @@ import {
     FaEyeSlash,
     FaCircleExclamation,
     FaTriangleExclamation,
+    FaBriefcase,
 } from "react-icons/fa6";
 
 import { ToastContainer, toast } from "react-toastify";
@@ -31,6 +32,16 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
 import "../../styles/CompanyProfile.css";
+import "../../styles/EmployeeList.css"; // shared premium header / button styles
+
+// Derive backend server origin from the API URL env var
+const _apiUrl = import.meta.env.VITE_API_URL || '';
+const BACKEND_ORIGIN = _apiUrl ? new URL(_apiUrl).origin : '';
+const getLogoSrc = (logoUrl) => {
+    if (!logoUrl) return null;
+    if (logoUrl.startsWith('http')) return logoUrl;
+    return BACKEND_ORIGIN + logoUrl;
+};
 import {
     getCompanyProfile,
     editCompanyProfile,
@@ -81,6 +92,7 @@ const CompanyProfile = () => {
     const [loading, setLoading] = useState(true);
     const [isEdit, setIsEdit] = useState(false);
     const [activeTab, setActiveTab] = useState("info"); // 'info' | 'security'
+    const [copiedKey, setCopiedKey] = useState(null);
 
     // Password visibility toggles
     const [showCurrent, setShowCurrent] = useState(false);
@@ -118,17 +130,17 @@ const CompanyProfile = () => {
 
     let strengthLabel = "Too Short";
     let strengthColor = "#94a3b8";
-    let strengthWidth = "10%";
+    let strengthWidth = "12%";
 
     if (newPasswordVal.length > 0) {
         if (passedChecks <= 2) {
             strengthLabel = "Weak";
             strengthColor = "#ef4444";
-            strengthWidth = "30%";
+            strengthWidth = "32%";
         } else if (passedChecks <= 4) {
             strengthLabel = "Medium";
             strengthColor = "#f59e0b";
-            strengthWidth = "65%";
+            strengthWidth = "66%";
         } else {
             strengthLabel = "Strong";
             strengthColor = "#10b981";
@@ -262,154 +274,52 @@ const CompanyProfile = () => {
         }
     };
 
-    const copyToClipboard = (text, label) => {
+    const copyToClipboard = (text, keyName, label) => {
         if (!text) return;
         navigator.clipboard.writeText(String(text));
+        setCopiedKey(keyName);
         toast.info(`Copied ${label} to clipboard!`);
+        setTimeout(() => setCopiedKey(null), 2500);
     };
 
-    const initials = (company?.company_name || "ES")
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
+    const copyFullSummary = () => {
+        if (!company) return;
+        const summary = `
+Enterprise: ${company.company_name || "N/A"}
+Enterprise ID: #${company.company_id || company.id || "N/A"}
+Contact Person: ${company.contact_person_name || "N/A"} (${company.designation || "N/A"})
+Email: ${company.email || "N/A"}
+Mobile: ${company.mobile || "N/A"}
+Status: ${company.status || "Active"}
+Staff Count: ${employeeCount}
+        `.trim();
+        navigator.clipboard.writeText(summary);
+        toast.success("Full company profile summary copied to clipboard!");
+    };
 
-    const companyIdFormatted = company?.company_id || company?.id || "1002";
+    const companyIdFormatted = company?.company_id || company?.id || "23";
 
     return (
         <div className="cp-page">
             <ToastContainer position="top-right" autoClose={3000} />
 
             <div className="cp-container">
-                {/* ── TOP BAR ─────────────────────────────────────── */}
-                <div className="cp-top-bar">
+                {/* ── PREMIUM GRADIENT HEADER ──────────────────────── */}
+                <div className="cp-top-bar" style={{ marginBottom: "10px" }}>
                     <div className="cp-title-wrap">
                         <h2>Company Profile</h2>
-                        <p>Manage and view your registered enterprise credentials & profile</p>
-                    </div>
-
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <button
-                            type="button"
-                            className="es-btn es-btn--ghost"
-                            onClick={fetchCompanyProfile}
-                            title="Refresh profile"
-                        >
-                            <FaArrowsRotate className={loading ? "fa-spin" : ""} /> Refresh
-                        </button>
-                        <button
-                            type="button"
-                            className="es-btn es-btn--ghost"
-                            onClick={() => navigate("/dashboard")}
-                        >
-                            <FaArrowLeft /> Dashboard
-                        </button>
                     </div>
                 </div>
 
-                {/* ── HERO BANNER CARD ────────────────────────────── */}
-                <div className="cp-hero-card">
-                    <div className="cp-banner">
-                        <div className="cp-banner-pattern"></div>
-                    </div>
-
-                    <div className="cp-hero-body">
-                        <div className="cp-avatar-group">
-                            <div className="cp-avatar">{initials}</div>
-                            <div>
-                                <h3 className="cp-name">
-                                    {company?.company_name || "Elation Softnet"}
-                                </h3>
-                                <div className="cp-sub">
-                                    <FaBuilding style={{ fontSize: "13px" }} />
-                                    <span>
-                                        Enterprise ID: #{companyIdFormatted}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            color: "#6366f1",
-                                            cursor: "pointer",
-                                            padding: "2px",
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                        }}
-                                        title="Copy Company ID"
-                                        onClick={() => copyToClipboard(companyIdFormatted, "Company ID")}
-                                    >
-                                        <FaCopy style={{ fontSize: "12px" }} />
-                                    </button>
-                                    <span>•</span>
-                                    <span
-                                        className="es-emp-badge es-emp-badge--active"
-                                        style={{ padding: "3px 9px", fontSize: "11px" }}
-                                    >
-                                        <span className="es-emp-status-dot"></span>
-                                        {company?.status || "Active Organization"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                            {activeTab === "info" && !isEdit && (
-                                <button
-                                    type="button"
-                                    className="es-btn es-btn--primary"
-                                    onClick={handleEdit}
-                                >
-                                    <FaPen /> Edit Corporate Info
-                                </button>
-                            )}
-                            {activeTab === "info" && isEdit && (
-                                <button
-                                    type="button"
-                                    className="es-btn es-btn--ghost"
-                                    onClick={handleCancel}
-                                >
-                                    <FaXmark /> Cancel Editing
-                                </button>
-                            )}
-                            <button
-                                type="button"
-                                className={`es-btn ${activeTab === "security" ? "es-btn--primary" : "es-btn--outline"}`}
-                                onClick={() => {
-                                    if (activeTab === "security") {
-                                        setActiveTab("info");
-                                    } else {
-                                        setActiveTab("security");
-                                        setIsEdit(false);
-                                    }
-                                }}
-                            >
-                                {activeTab === "security" ? (
-                                    <>
-                                        <FaBuilding /> Corporate Profile
-                                    </>
-                                ) : (
-                                    <>
-                                        <FaKey /> Change Password
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── METRICS ROW ─────────────────────────────────── */}
+                {/* ── METRICS & STATS ROW ─────────────────────────── */}
                 <div className="cp-stats-grid">
                     <div className="cp-stat-card">
                         <div className="cp-stat-icon cp-stat-icon--indigo">
                             <FaIdCard />
                         </div>
-                        <div>
+                        <div className="cp-stat-content">
                             <div className="cp-stat-label">Enterprise ID</div>
-                            <div className="cp-stat-val">
-                                #{companyIdFormatted}
-                            </div>
+                            <div className="cp-stat-val">#{companyIdFormatted}</div>
                         </div>
                     </div>
 
@@ -417,10 +327,10 @@ const CompanyProfile = () => {
                         <div className="cp-stat-icon cp-stat-icon--emerald">
                             <FaCircleCheck />
                         </div>
-                        <div>
+                        <div className="cp-stat-content">
                             <div className="cp-stat-label">Verification</div>
                             <div className="cp-stat-val" style={{ color: "#059669" }}>
-                                {company?.status || "Verified"}
+                                {company?.status ? company.status.toUpperCase() : "ACTIVE"}
                             </div>
                         </div>
                     </div>
@@ -429,11 +339,9 @@ const CompanyProfile = () => {
                         <div className="cp-stat-icon cp-stat-icon--purple">
                             <FaUsers />
                         </div>
-                        <div>
+                        <div className="cp-stat-content">
                             <div className="cp-stat-label">Staff Managed</div>
-                            <div className="cp-stat-val">
-                                {employeeCount} Employees
-                            </div>
+                            <div className="cp-stat-val">{employeeCount} Employees</div>
                         </div>
                     </div>
 
@@ -441,9 +349,9 @@ const CompanyProfile = () => {
                         <div className="cp-stat-icon cp-stat-icon--amber">
                             <FaCalendarDays />
                         </div>
-                        <div>
+                        <div className="cp-stat-content">
                             <div className="cp-stat-label">Member Since</div>
-                            <div className="cp-stat-val" style={{ fontSize: "14px" }}>
+                            <div className="cp-stat-val">
                                 {company?.created_at
                                     ? new Date(company.created_at).toLocaleDateString(undefined, {
                                           month: "short",
@@ -456,139 +364,199 @@ const CompanyProfile = () => {
                     </div>
                 </div>
 
-                {/* ── TABS ─────────────────────────────────────────── */}
-                <div className="cp-tab-bar">
-                    <button
-                        type="button"
-                        className={`cp-tab-btn ${activeTab === "info" ? "cp-tab-btn--active" : ""}`}
-                        onClick={() => setActiveTab("info")}
-                    >
-                        <FaBuilding /> Corporate Information
-                    </button>
-                    <button
-                        type="button"
-                        className={`cp-tab-btn ${activeTab === "security" ? "cp-tab-btn--active" : ""}`}
-                        onClick={() => {
-                            setActiveTab("security");
-                            setIsEdit(false);
-                        }}
-                    >
-                        <FaLock /> Security & Password
-                    </button>
+                {/* ── SEGMENTED NAVIGATION TABS ───────────────────── */}
+                <div className="cp-tab-container">
+                    <div className="cp-tab-bar">
+                        <button
+                            type="button"
+                            className={`cp-tab-btn ${activeTab === "info" ? "cp-tab-btn--active" : ""}`}
+                            onClick={() => setActiveTab("info")}
+                        >
+                            <FaBuilding /> Corporate Information
+                        </button>
+                        <button
+                            type="button"
+                            className={`cp-tab-btn ${activeTab === "security" ? "cp-tab-btn--active" : ""}`}
+                            onClick={() => {
+                                setActiveTab("security");
+                                setIsEdit(false);
+                            }}
+                        >
+                            <FaLock /> Security & Password
+                        </button>
+                    </div>
                 </div>
 
                 {/* ── TAB 1: CORPORATE INFORMATION ─────────────────── */}
                 {activeTab === "info" && (
                     !isEdit ? (
                         <div className="cp-card">
-                            <div className="cp-card-header">
-                                <div>
-                                    <h4 className="cp-card-title">Corporate Information</h4>
-                                    <span style={{ fontSize: "13px", color: "#64748b" }}>
-                                        Official verified enterprise business details
-                                    </span>
+                            {/* ── PREMIUM PROFILE HERO BANNER ── */}
+                            <div className="cp-profile-hero">
+                                <div className="cp-profile-hero__left">
+                                    <div className="cp-profile-hero__logo">
+                                        {company && company.logo_url ? (
+                                            <img
+                                                src={getLogoSrc(company.logo_url)}
+                                                alt={company.company_name || 'Company Logo'}
+                                                className="cp-profile-hero__logo-img"
+                                                onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.querySelector('.cp-profile-hero__logo-fallback').style.display = 'flex'; }}
+                                            />
+                                        ) : null}
+                                        <div className="cp-profile-hero__logo-fallback" style={{ display: company?.logo_url ? 'none' : 'flex' }}>
+                                            {(company?.company_name || 'A').charAt(0).toUpperCase()}
+                                        </div>
+                                    </div>
+                                    <div className="cp-profile-hero__info">
+                                        <h4 className="cp-profile-hero__title">Corporate Information</h4>
+                                        <span className="cp-profile-hero__sub">Official verified enterprise business details and contacts</span>
+                                    </div>
                                 </div>
                                 <button
                                     type="button"
                                     className="es-btn es-btn--ghost"
-                                    style={{ height: "32px", fontSize: "13px" }}
+                                    style={{ height: "34px", fontSize: "13px" }}
                                     onClick={handleEdit}
                                 >
                                     <FaPen style={{ fontSize: "11px" }} /> Edit Info
                                 </button>
                             </div>
 
-                            <div className="cp-grid">
-                                <div className="cp-item">
-                                    <div className="cp-label">
-                                        <FaBuilding /> Company Name
+                            {/* Balanced 2-column layout without nested box borders */}
+                            <div className="cp-grid-symmetric">
+                                {/* Group 1: Organization Legal Details */}
+                                <div className="cp-group-box">
+                                    <div className="cp-section-title">
+                                        <FaBuilding style={{ color: "#6366f1" }} /> Organization Profile
                                     </div>
-                                    <div className="cp-val">
-                                        {company?.company_name || "—"}
+
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Company Legal Name</div>
+                                            <div className="cp-field-value">{company?.company_name || "—"}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Enterprise ID Code</div>
+                                            <div className="cp-field-value">#{companyIdFormatted}</div>
+                                        </div>
+                                        <div className="cp-field-action">
+                                            <button
+                                                type="button"
+                                                className="cp-copy-icon-btn"
+                                                title="Copy ID"
+                                                onClick={() => copyToClipboard(companyIdFormatted, "card-id", "Company ID")}
+                                            >
+                                                {copiedKey === "card-id" ? (
+                                                    <FaCheck style={{ fontSize: "12px", color: "#059669" }} />
+                                                ) : (
+                                                    <FaCopy style={{ fontSize: "12px" }} />
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Account Verification</div>
+                                            <div className="cp-field-value">
+                                                <span className="cp-status-pill">
+                                                    <span className="cp-pulse-dot"></span>
+                                                    <span>{company?.status ? company.status.toUpperCase() : "VERIFIED ACTIVE"}</span>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="cp-item">
-                                    <div className="cp-label">
-                                        <FaUser /> Authorized Contact
+                                {/* Group 2: Executive Contact Details */}
+                                <div className="cp-group-box">
+                                    <div className="cp-section-title">
+                                        <FaUser style={{ color: "#6366f1" }} /> Authorized Representative
                                     </div>
-                                    <div className="cp-val">
-                                        {company?.contact_person_name || "—"}
-                                    </div>
-                                </div>
 
-                                <div className="cp-item">
-                                    <div className="cp-label">
-                                        <FaShieldHalved /> Designation
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Contact Person</div>
+                                            <div className="cp-field-value">{company?.contact_person_name || "—"}</div>
+                                        </div>
                                     </div>
-                                    <div className="cp-val">
-                                        {company?.designation || "—"}
-                                    </div>
-                                </div>
 
-                                <div className="cp-item">
-                                    <div className="cp-label">
-                                        <FaEnvelope /> Official Email
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Designation / Role</div>
+                                            <div className="cp-field-value">{company?.designation || "—"}</div>
+                                        </div>
                                     </div>
-                                    <div
-                                        className="cp-val"
-                                        style={{ color: "#4f46e5", display: "flex", alignItems: "center", gap: "8px" }}
-                                    >
-                                        <span>{company?.email || "—"}</span>
+
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Official Email</div>
+                                            <div className="cp-field-value" style={{ color: "#4f46e5" }}>
+                                                {company?.email || "—"}
+                                            </div>
+                                        </div>
                                         {company?.email && (
-                                            <button
-                                                type="button"
-                                                style={{
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "#6366f1",
-                                                    cursor: "pointer",
-                                                    padding: 0,
-                                                }}
-                                                onClick={() => copyToClipboard(company.email, "Email")}
-                                            >
-                                                <FaCopy style={{ fontSize: "12px" }} />
-                                            </button>
+                                            <div className="cp-field-action">
+                                                <button
+                                                    type="button"
+                                                    className="cp-copy-icon-btn"
+                                                    title="Copy Email"
+                                                    onClick={() => copyToClipboard(company.email, "card-email", "Email")}
+                                                >
+                                                    {copiedKey === "card-email" ? (
+                                                        <FaCheck style={{ fontSize: "12px", color: "#059669" }} />
+                                                    ) : (
+                                                        <FaCopy style={{ fontSize: "12px" }} />
+                                                    )}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
-                                </div>
 
-                                <div className="cp-item">
-                                    <div className="cp-label">
-                                        <FaPhone /> Contact Mobile
-                                    </div>
-                                    <div
-                                        className="cp-val"
-                                        style={{ color: "#4f46e5", display: "flex", alignItems: "center", gap: "8px" }}
-                                    >
-                                        <span>{company?.mobile || "—"}</span>
+                                    <div className="cp-field-row">
+                                        <div className="cp-field-meta">
+                                            <div className="cp-field-label">Official Mobile</div>
+                                            <div className="cp-field-value" style={{ color: "#4f46e5" }}>
+                                                {company?.mobile || "—"}
+                                            </div>
+                                        </div>
                                         {company?.mobile && (
-                                            <button
-                                                type="button"
-                                                style={{
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "#6366f1",
-                                                    cursor: "pointer",
-                                                    padding: 0,
-                                                }}
-                                                onClick={() => copyToClipboard(company.mobile, "Mobile")}
-                                            >
-                                                <FaCopy style={{ fontSize: "12px" }} />
-                                            </button>
+                                            <div className="cp-field-action">
+                                                <button
+                                                    type="button"
+                                                    className="cp-copy-icon-btn"
+                                                    title="Copy Mobile"
+                                                    onClick={() => copyToClipboard(company.mobile, "card-phone", "Mobile")}
+                                                >
+                                                    {copiedKey === "card-phone" ? (
+                                                        <FaCheck style={{ fontSize: "12px", color: "#059669" }} />
+                                                    ) : (
+                                                        <FaCopy style={{ fontSize: "12px" }} />
+                                                    )}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="cp-item">
-                                    <div className="cp-label">Account Verification Status</div>
-                                    <div className="cp-val">
-                                        <span className="es-emp-badge es-emp-badge--active">
-                                            <span className="es-emp-status-dot"></span>
-                                            {company?.status || "ACTIVE"}
-                                        </span>
-                                    </div>
+                            {/* Executive Summary Strip */}
+                            <div className="cp-summary-strip">
+                                <div className="cp-summary-text">
+                                    <FaShieldHalved style={{ fontSize: "16px" }} />
+                                    <span>Enterprise credentials verified & synchronized across all services.</span>
                                 </div>
+                                <button
+                                    type="button"
+                                    className="es-btn es-btn--ghost"
+                                    style={{ height: "32px", fontSize: "12px" }}
+                                    onClick={copyFullSummary}
+                                >
+                                    <FaCopy /> Copy Full Summary
+                                </button>
                             </div>
                         </div>
                     ) : (
@@ -596,109 +564,119 @@ const CompanyProfile = () => {
                             <div className="cp-card-header">
                                 <div>
                                     <h4 className="cp-card-title">Edit Corporate Information</h4>
-                                    <span style={{ fontSize: "13px", color: "#64748b" }}>
+                                    <span className="cp-card-subtitle">
                                         Updates will be synchronized across your enterprise credentials
                                     </span>
                                 </div>
                                 <button
                                     type="button"
                                     className="es-btn es-btn--ghost"
-                                    style={{ height: "32px", fontSize: "13px" }}
+                                    style={{ height: "34px", fontSize: "13px" }}
                                     onClick={handleCancel}
                                 >
                                     <FaXmark /> Cancel
                                 </button>
                             </div>
 
-                            <form
-                                onSubmit={handleSubmit(
-                                    handleUpdate,
-                                    handleValidationError
-                                )}
-                            >
-                                <div className="cp-form-grid">
+                            <form onSubmit={handleSubmit(handleUpdate, handleValidationError)}>
+                                <div className="cp-form-grid-symmetric">
                                     <div className="cp-form-group">
                                         <label className="cp-form-label">
-                                            Company Name *
+                                            <FaBuilding style={{ color: "#6366f1" }} /> Company Registered Name *
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="cp-form-input"
-                                            placeholder="Enter company registered name"
-                                            {...register("company_name")}
-                                        />
+                                        <div className="cp-input-wrap">
+                                            <FaBuilding className="cp-input-icon" />
+                                            <input
+                                                type="text"
+                                                className={`cp-form-input ${errors.company_name ? "cp-input--error" : ""}`}
+                                                placeholder="Enter registered company name"
+                                                {...register("company_name")}
+                                            />
+                                        </div>
                                         {errors.company_name && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {errors.company_name.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {errors.company_name.message}
                                             </span>
                                         )}
                                     </div>
 
                                     <div className="cp-form-group">
                                         <label className="cp-form-label">
-                                            Authorized Contact Person *
+                                            <FaUser style={{ color: "#6366f1" }} /> Authorized Contact Person *
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="cp-form-input"
-                                            placeholder="Enter contact person name"
-                                            {...register("contact_person_name")}
-                                        />
+                                        <div className="cp-input-wrap">
+                                            <FaUser className="cp-input-icon" />
+                                            <input
+                                                type="text"
+                                                className={`cp-form-input ${errors.contact_person_name ? "cp-input--error" : ""}`}
+                                                placeholder="Full name of representative"
+                                                {...register("contact_person_name")}
+                                            />
+                                        </div>
                                         {errors.contact_person_name && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {errors.contact_person_name.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {errors.contact_person_name.message}
                                             </span>
                                         )}
                                     </div>
 
                                     <div className="cp-form-group">
                                         <label className="cp-form-label">
-                                            Designation / Title *
+                                            <FaBriefcase style={{ color: "#6366f1" }} /> Corporate Designation / Title *
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="cp-form-input"
-                                            placeholder="e.g. Director, Operations Lead"
-                                            {...register("designation")}
-                                        />
+                                        <div className="cp-input-wrap">
+                                            <FaBriefcase className="cp-input-icon" />
+                                            <input
+                                                type="text"
+                                                className={`cp-form-input ${errors.designation ? "cp-input--error" : ""}`}
+                                                placeholder="e.g. Managing Director, Operations Lead"
+                                                {...register("designation")}
+                                            />
+                                        </div>
                                         {errors.designation && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {errors.designation.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {errors.designation.message}
                                             </span>
                                         )}
                                     </div>
 
                                     <div className="cp-form-group">
                                         <label className="cp-form-label">
-                                            Official Business Email *
+                                            <FaEnvelope style={{ color: "#6366f1" }} /> Official Corporate Email *
                                         </label>
-                                        <input
-                                            type="email"
-                                            className="cp-form-input"
-                                            placeholder="official@company.com"
-                                            {...register("email")}
-                                        />
+                                        <div className="cp-input-wrap">
+                                            <FaEnvelope className="cp-input-icon" />
+                                            <input
+                                                type="email"
+                                                className={`cp-form-input ${errors.email ? "cp-input--error" : ""}`}
+                                                placeholder="official@company.com"
+                                                {...register("email")}
+                                            />
+                                        </div>
                                         {errors.email && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {errors.email.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {errors.email.message}
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="cp-form-group" style={{ gridColumn: "1 / -1" }}>
+                                    <div className="cp-form-group cp-form-group--full">
                                         <label className="cp-form-label">
-                                            Official Mobile Number (10 digits) *
+                                            <FaPhone style={{ color: "#6366f1" }} /> Official Mobile Number (10 digits) *
                                         </label>
-                                        <input
-                                            type="text"
-                                            maxLength={10}
-                                            className="cp-form-input"
-                                            placeholder="e.g. 9876543210"
-                                            {...register("mobile")}
-                                        />
+                                        <div className="cp-input-wrap">
+                                            <FaPhone className="cp-input-icon" />
+                                            <input
+                                                type="text"
+                                                maxLength={10}
+                                                className={`cp-form-input ${errors.mobile ? "cp-input--error" : ""}`}
+                                                placeholder="e.g. 9876543210"
+                                                {...register("mobile")}
+                                            />
+                                        </div>
                                         {errors.mobile && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {errors.mobile.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {errors.mobile.message}
                                             </span>
                                         )}
                                     </div>
@@ -718,7 +696,7 @@ const CompanyProfile = () => {
                                         className="es-btn es-btn--primary"
                                         disabled={isSubmitting}
                                     >
-                                        <FaCheck /> {isSubmitting ? "Updating..." : "Save Corporate Changes"}
+                                        <FaCheck /> {isSubmitting ? "Saving Changes..." : "Save Corporate Changes"}
                                     </button>
                                 </div>
                             </form>
@@ -735,24 +713,25 @@ const CompanyProfile = () => {
                                     <h4 className="cp-card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                         <FaLock style={{ color: "#4f46e5" }} /> Change Corporate Password
                                     </h4>
-                                    <span style={{ fontSize: "13px", color: "#64748b" }}>
-                                        Ensure your organization login credentials remain safe and up-to-date
+                                    <span className="cp-card-subtitle">
+                                        Ensure your organization login credentials remain protected
                                     </span>
                                 </div>
                             </div>
 
                             <form onSubmit={handlePassSubmit(handlePasswordUpdate)}>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div className="cp-password-stack">
                                     {/* Current Password */}
                                     <div className="cp-form-group">
                                         <label className="cp-form-label">
                                             Current Password *
                                         </label>
-                                        <div className="cp-input-icon-wrap">
-                                            <FaLock className="cp-input-left-icon" />
+                                        <div className="cp-input-wrap">
+                                            <FaLock className="cp-input-icon" />
                                             <input
                                                 type={showCurrent ? "text" : "password"}
-                                                className="cp-form-input cp-input-with-icons"
+                                                className={`cp-form-input ${passErrors.current_password ? "cp-input--error" : ""}`}
+                                                style={{ paddingRight: "44px" }}
                                                 placeholder="Enter current account password"
                                                 {...registerPass("current_password")}
                                             />
@@ -766,8 +745,8 @@ const CompanyProfile = () => {
                                             </button>
                                         </div>
                                         {passErrors.current_password && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {passErrors.current_password.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {passErrors.current_password.message}
                                             </span>
                                         )}
                                     </div>
@@ -777,11 +756,12 @@ const CompanyProfile = () => {
                                         <label className="cp-form-label">
                                             New Password *
                                         </label>
-                                        <div className="cp-input-icon-wrap">
-                                            <FaKey className="cp-input-left-icon" />
+                                        <div className="cp-input-wrap">
+                                            <FaKey className="cp-input-icon" />
                                             <input
                                                 type={showNew ? "text" : "password"}
-                                                className="cp-form-input cp-input-with-icons"
+                                                className={`cp-form-input ${passErrors.new_password ? "cp-input--error" : ""}`}
+                                                style={{ paddingRight: "44px" }}
                                                 placeholder="Enter new strong password"
                                                 {...registerPass("new_password")}
                                             />
@@ -795,8 +775,8 @@ const CompanyProfile = () => {
                                             </button>
                                         </div>
                                         {passErrors.new_password && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {passErrors.new_password.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {passErrors.new_password.message}
                                             </span>
                                         )}
 
@@ -849,11 +829,12 @@ const CompanyProfile = () => {
                                         <label className="cp-form-label">
                                             Confirm New Password *
                                         </label>
-                                        <div className="cp-input-icon-wrap">
-                                            <FaLock className="cp-input-left-icon" />
+                                        <div className="cp-input-wrap">
+                                            <FaLock className="cp-input-icon" />
                                             <input
                                                 type={showConfirm ? "text" : "password"}
-                                                className="cp-form-input cp-input-with-icons"
+                                                className={`cp-form-input ${passErrors.confirm_password ? "cp-input--error" : ""}`}
+                                                style={{ paddingRight: "44px" }}
                                                 placeholder="Re-enter your new password"
                                                 {...registerPass("confirm_password")}
                                             />
@@ -867,12 +848,12 @@ const CompanyProfile = () => {
                                             </button>
                                         </div>
                                         {passErrors.confirm_password && (
-                                            <span style={{ color: "var(--danger)", fontSize: "12px", marginTop: "4px" }}>
-                                                {passErrors.confirm_password.message}
+                                            <span className="cp-error-msg">
+                                                <FaCircleExclamation /> {passErrors.confirm_password.message}
                                             </span>
                                         )}
                                         {confirmPasswordVal && !passErrors.confirm_password && (
-                                            <span style={{ color: "#059669", fontSize: "12px", marginTop: "4px", display: "flex", alignItems: "center", gap: "5px" }}>
+                                            <span style={{ color: "#059669", fontSize: "12px", marginTop: "5px", display: "flex", alignItems: "center", gap: "5px", fontWeight: 600 }}>
                                                 <FaCircleCheck /> Passwords match
                                             </span>
                                         )}
@@ -899,16 +880,16 @@ const CompanyProfile = () => {
                             </form>
                         </div>
 
-                        {/* Security Recommendations Panel */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                        {/* Security Recommendations Sidebar */}
+                        <div className="cp-security-sidebar">
                             <div className="cp-security-card">
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "18px" }}>
                                     <div className="cp-stat-icon cp-stat-icon--indigo">
                                         <FaShieldHalved />
                                     </div>
                                     <div>
-                                        <h5 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#0f172a" }}>Account Security</h5>
-                                        <span style={{ fontSize: "12px", color: "#64748b" }}>Enterprise Recommendations</span>
+                                        <h5 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#0f172a" }}>Enterprise Security</h5>
+                                        <span style={{ fontSize: "12px", color: "#64748b" }}>Authentication Best Practices</span>
                                     </div>
                                 </div>
 
@@ -917,8 +898,8 @@ const CompanyProfile = () => {
                                         <FaKey />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}>Use Unique Credentials</div>
-                                        <div style={{ fontSize: "12px", color: "#64748b" }}>Avoid reusing passwords across corporate portals or personal services.</div>
+                                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}>Unique Credentials</div>
+                                        <div style={{ fontSize: "12px", color: "#64748b" }}>Never reuse corporate credentials across external portals or personal services.</div>
                                     </div>
                                 </div>
 
@@ -927,8 +908,8 @@ const CompanyProfile = () => {
                                         <FaCircleCheck />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}>Confidentiality</div>
-                                        <div style={{ fontSize: "12px", color: "#64748b" }}>Never share enterprise credentials with unauthorized personnel.</div>
+                                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}>Strict Confidentiality</div>
+                                        <div style={{ fontSize: "12px", color: "#64748b" }}>Keep administrative login passwords strictly confidential to authorized staff.</div>
                                     </div>
                                 </div>
 
@@ -938,19 +919,19 @@ const CompanyProfile = () => {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}>Immediate Escalation</div>
-                                        <div style={{ fontSize: "12px", color: "#64748b" }}>If credentials are suspected compromised, update immediately and inform administrator.</div>
+                                        <div style={{ fontSize: "12px", color: "#64748b" }}>If any unauthorized access is suspected, change password immediately.</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="cp-security-card" style={{ background: "#f8fafc" }}>
-                                <div style={{ fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "8px" }}>
-                                    Session Information
+                                <div style={{ fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "10px" }}>
+                                    Active Session Info
                                 </div>
-                                <div style={{ fontSize: "12px", color: "#64748b", lineHeight: "1.7" }}>
-                                    • Logged in as: <strong style={{ color: "#0f172a" }}>{company?.company_name || "Company Admin"}</strong><br />
+                                <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.8" }}>
+                                    • Organization: <strong style={{ color: "#0f172a" }}>{company?.company_name || "Company Admin"}</strong><br />
                                     • Enterprise ID: <strong style={{ color: "#4f46e5" }}>#{companyIdFormatted}</strong><br />
-                                    • Status: <span style={{ color: "#059669", fontWeight: 600 }}>Active JWT Authenticated</span>
+                                    • Status: <span style={{ color: "#059669", fontWeight: 700 }}>Active JWT Authenticated</span>
                                 </div>
                             </div>
                         </div>

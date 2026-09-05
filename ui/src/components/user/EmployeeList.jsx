@@ -694,6 +694,26 @@ const EmployeeList = () => {
                         </div>
 
                         <div className="es-modal__body">
+                            {/* Profile header */}
+                            <div className="view-modal-profile">
+                                {(viewItem?.profile_image || viewItem?.avatar || viewItem?.img || viewItem?.photo) ? (
+                                    <img
+                                        src={viewItem.profile_image || viewItem.avatar || viewItem.img || viewItem.photo}
+                                        alt={viewItem?.full_name || viewItem?.name}
+                                        className="view-modal-avatar"
+                                    />
+                                ) : (
+                                    <div className="view-modal-avatar-placeholder">
+                                        {(viewItem?.full_name || viewItem?.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="view-modal-profile-info">
+                                    <div className="view-modal-name">{viewItem?.full_name || viewItem?.name || "—"}</div>
+                                    <div className="view-modal-code">
+                                        {viewItem?.employee_code ? `#${viewItem.employee_code}` : `ID: ${viewItem?.employee_id || viewItem?.id}`}
+                                    </div>
+                                </div>
+                            </div>
                             <div className="es-modal__grid">
                                 <div className="es-modal__field">
                                     <div className="es-modal__label">
@@ -879,30 +899,30 @@ const EmployeeList = () => {
             )}
 
             {/* =================================================
-                PAGE HEADER
+                PAGE HEADER — PREMIUM GRADIENT
             ================================================= */}
-            <div className="es-page-header">
-                <div>
-                    <div className="es-page-title">Employees</div>
+            <div className="es-page-header-premium">
+                <div style={{ position: "relative", zIndex: 1 }}>
+                    <div className="es-page-title">Team Employees</div>
                     <div className="es-page-subtitle">
                         {loading
                             ? "Loading dynamic employees..."
                             : query.trim() || filterDepartment || filterStatus
                             ? `${displayData.length} result${displayData.length !== 1 ? "s" : ""} found`
-                            : `${data.length} total employees`}
+                            : `${data.length} total employees registered`}
                     </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "10px" }}>
+                <div className="es-header-btn-group">
                     <button
-                        className="es-btn es-btn--ghost"
+                        className="es-btn--header-ghost"
                         onClick={() => fetchData()}
                         title="Refresh List"
                     >
                         <FaArrowsRotate className={loading ? "fa-spin" : ""} /> Refresh
                     </button>
                     <button
-                        className="es-btn es-btn--primary"
+                        className="es-btn--header-primary"
                         onClick={() => setIsAddModalOpen(true)}
                     >
                         <FaUserPlus /> Add Employee
@@ -913,10 +933,7 @@ const EmployeeList = () => {
             {/* =================================================
                 SEARCH & FILTERS
             ================================================= */}
-            <div
-                className="es-search-bar"
-                style={{ marginBottom: "16px" }}
-            >
+            <div className="es-search-bar-premium">
                 {/* SEARCH INPUT */}
                 <div className="es-input-wrap">
                     <FaMagnifyingGlass className="es-input-icon" />
@@ -1003,7 +1020,7 @@ const EmployeeList = () => {
             {/* =================================================
                 TABLE
             ================================================= */}
-            <div className="es-table-wrap">
+            <div className="es-table-wrap-premium">
                 <table className="es-table">
                     <thead>
                         <tr>
@@ -1082,16 +1099,39 @@ const EmployeeList = () => {
                                 const empStatus = item?.status || "ACTIVE";
                                 const isVerified = !!item?.emp_verified;
 
+                                // Avatar: real image if available, else initials with gradient color
+                                const empImg = item?.profile_image || item?.avatar || item?.img || item?.photo || null;
+                                const avatarInitials = empName !== "—"
+                                    ? empName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()
+                                    : "?";
+                                const avatarColorIdx = (empId % 6).toString();
+
                                 return (
                                     <tr key={empId}>
-                                        {/* EMPLOYEE NAME */}
+                                        {/* EMPLOYEE NAME + AVATAR */}
                                         <td data-label="ID & Employee Name">
-                                            <div className="tbl-main">
-                                                {empName}
-                                            </div>
-                                            <div className="tbl-sub">
-                                                ID: {empId}
-                                                {empCode ? ` • ${empCode}` : ""}
+                                            <div className="emp-cell-identity">
+                                                {empImg ? (
+                                                    <img
+                                                        src={empImg}
+                                                        alt={empName}
+                                                        className="emp-avatar"
+                                                        onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
+                                                    />
+                                                ) : null}
+                                                <div
+                                                    className="emp-avatar-placeholder"
+                                                    data-color={avatarColorIdx}
+                                                    style={{ display: empImg ? "none" : "flex" }}
+                                                >
+                                                    {avatarInitials}
+                                                </div>
+                                                <div className="emp-cell-identity-text">
+                                                    <div className="tbl-main">{empName}</div>
+                                                    <div className="tbl-sub">
+                                                        ID: {empId}{empCode ? ` • ${empCode}` : ""}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
 
@@ -1132,28 +1172,17 @@ const EmployeeList = () => {
                                         {/* VERIFIED */}
                                         <td data-label="Verified">
                                             {isVerified ? (
-                                                <span
-                                                    className="es-emp-badge es-emp-badge--active"
-                                                    style={{ fontSize: "11px", padding: "2px 8px" }}
-                                                    title="Employee Verified"
-                                                >
-                                                    Verified
+                                                <span className="es-verified-badge" title="Employee Verified">
+                                                    ✓ Verified
                                                 </span>
                                             ) : (
                                                 <button
                                                     type="button"
-                                                    className="es-btn es-btn--ghost"
-                                                    style={{
-                                                        height: "26px",
-                                                        fontSize: "11px",
-                                                        padding: "0 8px",
-                                                        color: "#d97706",
-                                                        borderColor: "#fde68a",
-                                                    }}
+                                                    className="es-pending-badge"
                                                     onClick={() => handleVerifyConfirm(item)}
                                                     title="Click to verify this employee"
                                                 >
-                                                    Verify Now
+                                                    ⚡ Verify Now
                                                 </button>
                                             )}
                                         </td>

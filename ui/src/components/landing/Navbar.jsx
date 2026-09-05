@@ -8,34 +8,46 @@ import {
     FaRightFromBracket,
 } from 'react-icons/fa6';
 
+// Import company profile service
+import { getCompanyProfile } from '../../services/AdminServices';
+
 const Navbar = () => {
     const lock = useLocation();
-    const [data, setData] = useState();
+    const [token, setToken] = useState();
+    const [company, setCompany] = useState(null);
 
     useEffect(() => {
-        handleData();
-    }, [lock])
-
-    const handleData = async () => {
-        const token = localStorage.getItem('token');
-        setData(token);
-    }
+        const t = localStorage.getItem('token');
+        setToken(t);
+        if (t) {
+            // Fetch company profile for logo
+            getCompanyProfile()
+                .then(res => {
+                    // API returns data under res.data (depending on axios config)
+                    const payload = res?.data?.data || res?.data;
+                    setCompany(payload);
+                })
+                .catch(() => setCompany(null));
+        }
+    }, [lock]);
 
     const handleLogout = async () => {
         localStorage.removeItem('token');
-    }
+    };
 
     const isActive = (path) => lock.pathname === path ? 'es-navbar__link active' : 'es-navbar__link';
 
     return (
         <nav className="es-navbar">
             <Link to="/dashboard" className="es-navbar__brand">
-                <div className="es-navbar__avatar">ES</div>
+                <div className="es-navbar__avatar">
+                    ES
+                </div>
                 <span>Elation Softnet</span>
             </Link>
 
             <ul className="es-navbar__links">
-                {data ? (
+                {token ? (
                     <>
                         <li>
                             <Link to="/dashboard" className={isActive('/dashboard')}>
@@ -92,7 +104,7 @@ const Navbar = () => {
                 )}
             </ul>
         </nav>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;
