@@ -230,6 +230,11 @@
     gap: 16px;
 }
 
+.cp-title-wrap {
+    padding-left: 24px;
+    padding-top: 16px;
+}
+
 .cp-title-wrap h2 {
     font-size: 24px;
     font-weight: 800;

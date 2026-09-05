@@ -873,8 +873,6 @@ const EmployeeList = () => {
                                     {deleteItem?.full_name || deleteItem?.name}
                                 </strong>
                                 ?
-                                <br />
-                                Their status will be set to <strong>INACTIVE</strong> in the database.
                             </div>
                         </div>
 

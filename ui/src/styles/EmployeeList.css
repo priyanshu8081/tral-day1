@@ -141,31 +141,32 @@
 .es-btn--header-primary {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 18px;
-    border-radius: 10px;
-    font-size: 13px;
+    gap: 8px;
+    height: 42px;
+    padding: 0 22px;
+    border-radius: 14px;
+    font-size: 14px;
     font-weight: 700;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    background: #ffffff;
+    background: #4f46e5;
     border: none;
-    color: #4f46e5;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    color: #ffffff;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
     white-space: nowrap;
 }
 
 .es-btn--header-primary:hover {
-    background: #eef2ff;
-    color: #3730a3;
+    background: #4338ca;
+    color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+    box-shadow: 0 8px 22px rgba(79, 70, 229, 0.55);
 }
 
 .es-btn--header-primary:active {
     transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
 }
 
 /* ── SEARCH BAR PREMIUM ──────────────────── */
@@ -502,6 +503,13 @@
 
 /* ── RESPONSIVE ──────────────────────────── */
 @media (max-width: 768px) {
+    .es-table-wrap,
+    .es-table-wrap-premium {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
     .es-page-header-premium {
         padding: 18px 20px;
     }
@@ -511,8 +519,24 @@
     }
 
     .emp-cell-identity {
-        flex-direction: row;
-        gap: 10px;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        justify-content: flex-end !important;
+        text-align: right !important;
+        width: 100%;
+        gap: 2px;
+    }
+
+    .es-table tbody tr,
+    .es-table-wrap-premium .es-table tbody tr {
+        border-bottom: none !important;
+    }
+
+    .es-table td:last-child,
+    .es-table td:last-of-type,
+    .es-table-wrap-premium .es-table td:last-child,
+    .es-table-wrap-premium .es-table td:last-of-type {
+        border-bottom: none !important;
     }
 
     .view-modal-profile {
