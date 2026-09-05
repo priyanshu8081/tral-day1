@@ -11,6 +11,7 @@ import {
     FaCircleCheck,
     FaArrowDownWideShort,
     FaArrowUpShortWide,
+    FaEyeSlash,
 } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -42,6 +43,7 @@ const EmployeeList = () => {
 
     // MODAL STATES
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [showEmpPassword, setShowEmpPassword] = useState(false);
     const [viewItem, setViewItem] = useState(null);
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
@@ -146,7 +148,7 @@ const EmployeeList = () => {
         } else {
             setFormData({
                 full_name: "",
-                employee_code: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
+                employee_code: `EMP-${Math.floor(100000 + Math.random() * 900000)}`,
                 role: "",
                 department: "Engineering",
                 email: "",
@@ -314,13 +316,26 @@ const EmployeeList = () => {
                     return;
                 }
 
+                const codeVal =
+                    formData.employee_code.trim() ||
+                    `EMP-${Math.floor(100000 + Math.random() * 900000)}`;
+
                 const payload = {
                     company_id: Number(cId),
-                    employee_code: formData.employee_code.trim(),
+                    employee_code: codeVal,
+                    emp_code: codeVal,
+                    employeeCode: codeVal,
+                    code: codeVal,
                     full_name: formData.full_name.trim(),
+                    name: formData.full_name.trim(),
                     mobile_no: formData.phone.trim(),
+                    phone: formData.phone.trim(),
+                    mobile: formData.phone.trim(),
                     email: formData.email.trim(),
                     password: formData.password.trim(),
+                    role: formData.role ? formData.role.trim() : "",
+                    designation: formData.role ? formData.role.trim() : "",
+                    department: formData.department ? formData.department.trim() : "Engineering",
                 };
 
                 const createRes = await createEmployee(payload);
@@ -591,20 +606,29 @@ const EmployeeList = () => {
                                             <label className="es-modal__label">
                                                 Account Password *
                                             </label>
-                                            <input
-                                                type="text"
-                                                className="es-input"
-                                                placeholder="Set employee login password"
-                                                value={formData.password}
-                                                onChange={(e) =>
-                                                    setFormData({
-                                                        ...formData,
-                                                        password: e.target.value,
-                                                    })
-                                                }
-                                                required
-                                                style={{ width: "100%" }}
-                                            />
+                                            <div style={{ position: "relative" }}>
+                                                <input
+                                                    type={showEmpPassword ? "text" : "password"}
+                                                    className="es-input"
+                                                    placeholder="Set employee login password"
+                                                    value={formData.password}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            password: e.target.value,
+                                                        })
+                                                    }
+                                                    required
+                                                    style={{ width: "100%", paddingRight: "40px" }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowEmpPassword(!showEmpPassword)}
+                                                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "16px", display: "flex", alignItems: "center" }}
+                                                >
+                                                    {showEmpPassword ? <FaEyeSlash /> : <FaEye />}
+                                                </button>
+                                            </div>
                                             <span style={{ fontSize: "12px", color: "var(--gray-500)", marginTop: "4px", display: "block" }}>
                                                 Password for employee portal login credentials
                                             </span>

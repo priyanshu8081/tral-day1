@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -27,6 +28,7 @@ const schema = yup.object().shape({
 
 const Register = () => {
     const [loading,setLoading]=useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const {
@@ -183,12 +185,22 @@ const Register = () => {
                                         Password
                                     </label>
 
-                                    <input
-                                        {...register("password")}
-                                        type="password"
-                                        className="form-control"
-                                        placeholder="Create a password"
-                                    />
+                                    <div style={{ position: "relative" }}>
+                                        <input
+                                            {...register("password")}
+                                            type={showPassword ? "text" : "password"}
+                                            className="form-control"
+                                            placeholder="Create a password"
+                                            style={{ paddingRight: "40px" }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "16px", display: "flex", alignItems: "center" }}
+                                        >
+                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </button>
+                                    </div>
 
                                     {errors.password && (
                                         <small className="error">
