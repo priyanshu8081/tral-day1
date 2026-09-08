@@ -8,12 +8,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { passwordValidation } from "../../utils/Validation";
 import { loginUser } from "../../services/LandingServices";
 import { ToastService } from "../../utils/ToastUtils";
+import EyeButton from "../../components/landing/EyeButton";
 import "../../styles/Login.css";
 
 const schema = yup.object().shape({
     identifier: yup.string().required("Email or mobile is required"),
     password: passwordValidation,
 });
+
 
 const Login = () => {
     const navigate = useNavigate();
@@ -203,12 +205,12 @@ const Login = () => {
 
                             {/* LOGIN */}
 
-                            <button  disabled={loading}
-                                type="submit"
+                            <EyeButton
+                                label="Login"
+                                loadLabel="Logging in…"
+                                loading={loading}
                                 className="login-btn"
-                            >
-                                {loading? "Logging in...":"Login"}
-                            </button>
+                            />
 
                         </form>
 

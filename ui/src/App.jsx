@@ -10,6 +10,7 @@ import Navbar from './components/landing/Navbar';
 import EmployeeList from './components/user/EmployeeList';
 import CompanyProfile from './pages/admin/CompanyProfile';
 import Dashboard from './components/Admin/Dashboard';
+import CursorAnimation from './components/CursorAnimation';
 const App = () => {
   const location = useLocation();
 
@@ -19,6 +20,7 @@ const App = () => {
     location.pathname === "/register";
   return (
     <>
+      <CursorAnimation />
       {!hideNavbar && <Navbar />}
       <Routes>
         {/* public  */}

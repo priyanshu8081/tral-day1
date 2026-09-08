@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import EyeButton from "../../components/landing/EyeButton";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -352,12 +353,12 @@ const Register = () => {
 
                             {/* CREATE BUTTON */}
 
-                            <button disabled={loading}
-                                type="submit"
+                            <EyeButton
+                                label="Create account"
+                                loadLabel="Creating account…"
+                                loading={loading}
                                 className="create-btn"
-                            >
-                                {loading ? "creating account":"create account"}
-                            </button>
+                            />
 
 
                             {/* LOGIN */}

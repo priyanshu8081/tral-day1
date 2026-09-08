@@ -1,0 +1,98 @@
+/* Hide default cursor */
+* {
+  cursor: none !important;
+}
+
+/* ── Main dot cursor ─────────────────────────────── */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: #4f46e5;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s ease, height 0.15s ease, background 0.15s ease;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.6), 0 0 20px rgba(79, 70, 229, 0.3);
+}
+
+/* ── Follower ring ───────────────────────────────── */
+.cursor-follower {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(79, 70, 229, 0.55);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    border-color 0.3s ease,
+    background 0.3s ease;
+  backdrop-filter: blur(1px);
+}
+
+/* ── Trail dots ──────────────────────────────────── */
+.cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: rgba(79, 70, 229, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Hover state ─────────────────────────────────── */
+.cursor-dot.cursor--hover {
+  width: 12px;
+  height: 12px;
+  background: #818cf8;
+  box-shadow: 0 0 16px rgba(129, 140, 248, 0.8), 0 0 32px rgba(129, 140, 248, 0.4);
+}
+
+.cursor-follower.follower--hover {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(129, 140, 248, 0.7);
+  background: rgba(79, 70, 229, 0.06);
+}
+
+/* ── Click state ─────────────────────────────────── */
+.cursor-dot.cursor--click {
+  width: 5px;
+  height: 5px;
+  background: #c7d2fe;
+  box-shadow: 0 0 18px rgba(199, 210, 254, 0.9), 0 0 36px rgba(199, 210, 254, 0.5);
+}
+
+.cursor-follower.follower--click {
+  width: 50px;
+  height: 50px;
+  border-color: rgba(199, 210, 254, 0.8);
+  background: rgba(199, 210, 254, 0.08);
+}
+
+@keyframes cursorRipple {
+  0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0;   }
+}
+
+.cursor-follower.follower--click::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(199, 210, 254, 0.6);
+  animation: cursorRipple 0.4s ease-out forwards;
+}
